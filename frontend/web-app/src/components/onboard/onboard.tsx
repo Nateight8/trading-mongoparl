@@ -115,6 +115,7 @@ export default function Onboard() {
             className="h-full bg-primary transition-all duration-300"
             style={{ width: `${(currentStep / totalSteps) * 100}%` }}
           />
+          <div className="h-1" />
         </div>
         <Form {...form}>
           <form
@@ -143,7 +144,7 @@ export default function Onboard() {
                 >
                   Back
                 </Button>
-                {currentStep === totalSteps + 1 ? (
+                {currentStep === 4 ? (
                   <Button type="submit">submit</Button>
                 ) : (
                   <Button type="button" onClick={handleNext}>

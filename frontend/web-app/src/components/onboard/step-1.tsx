@@ -3,7 +3,7 @@ import { CheckCircle } from "lucide-react";
 export default function Step1() {
   return (
     <>
-      <div className="space-y-8 py-20">
+      <div className="space-y-8 py-20 max-w-xl mx-auto">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold">Welcome to Trading Mongopark</h1>
           <p className="text-xl text-muted-foreground">
