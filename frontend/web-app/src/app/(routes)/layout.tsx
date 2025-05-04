@@ -20,7 +20,7 @@ export default function RootLayout({
     <SidebarProvider>
       <AppSidebar />
       <LayoutContainer>
-        <main className="h-screen flex flex-col">
+        <main className="flex flex-col min-h-screen">
           <AppNavbar />
           <div className="flex-1 py-4">{children}</div>
         </main>

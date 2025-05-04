@@ -29,7 +29,7 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen w-full flex flex-col gap-6 ">
+    <div className=" w-full max-w-6xl mx-auto flex flex-col gap-6 ">
       <Overview />
       <Assets />
     </div>

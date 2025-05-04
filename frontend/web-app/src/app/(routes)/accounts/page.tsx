@@ -1,5 +1,5 @@
-import TradingAccounts from "./_components/accounts";
-// import TradingAccounts from "./_components/accounts";
+// import TradingAccounts from "./_components/accounts-table";
+import TradingAccounts from "@/components/account/assets";
 
 export default function AccountsPage() {
   return (

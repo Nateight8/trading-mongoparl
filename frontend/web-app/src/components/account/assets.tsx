@@ -1,7 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table } from "lucide-react";
-import { Grid } from "lucide-react";
 import Account from "./account";
+import AccountsTable from "@/app/(routes)/accounts/_components/accounts-table";
+import { IconCategory2, IconChartArea, IconTable } from "@tabler/icons-react";
+import Charts from "./charts";
 
 export default function Component() {
   return (
@@ -24,12 +25,13 @@ export default function Component() {
         </TabsList>
       </div>
       <TabsContent value="table">
-        <p className="text-muted-foreground p-4 text-center text-xs">
-          Content for Tab 1
-        </p>
+        <AccountsTable data={accountStats} />
+      </TabsContent>
+      <TabsContent value="charts">
+        <Charts />
       </TabsContent>
       <TabsContent value="grid">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           {accountStats.map((accountStat) => (
             <Account key={accountStat.id} {...accountStat} />
           ))}
@@ -43,12 +45,17 @@ const tabs = [
   {
     label: "Table",
     value: "table",
-    Icon: <Table />,
+    Icon: <IconTable />,
+  },
+  {
+    label: "Charts",
+    value: "charts",
+    Icon: <IconChartArea />,
   },
   {
     label: "Grid",
     value: "grid",
-    Icon: <Grid />,
+    Icon: <IconCategory2 />,
   },
 ];
 
@@ -56,24 +63,28 @@ const tabs = [
 const accountStats = [
   {
     id: 1,
+    name: "FTMO Challenge",
     balance: 10000,
     pnl: 1200,
     winrate: 62,
   },
   {
     id: 2,
+    name: "Funded Next",
     balance: 5000,
     pnl: 300,
     winrate: 55,
   },
   {
     id: 3,
+    name: "Personal Account",
     balance: 2000,
     pnl: 150,
     winrate: 48,
   },
   {
     id: 4,
+    name: "Alpha Capitals",
     balance: 25000,
     pnl: 2500,
     winrate: 70,

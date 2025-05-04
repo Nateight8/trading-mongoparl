@@ -1,10 +1,12 @@
 import { IconTrendingUp } from "@tabler/icons-react";
 
 export default function Account({
+  name,
   balance,
   pnl,
   winrate,
 }: {
+  name: string;
   balance: number;
   pnl: number;
   winrate: number;
@@ -13,7 +15,7 @@ export default function Account({
     <div className=" w-full hover:cursor-pointer hover:bg-muted  shadow-black shadow-sm rounded-lg border p-8">
       <div className="flex justify-between items-center">
         <div className="">
-          <h3 className="text-lg font-bold">Account</h3>
+          <h3 className="text-lg font-bold">{name}</h3>
           <p className="text-sm text-muted-foreground">
             <span className="font-bold">Account #:</span> *****890
           </p>
