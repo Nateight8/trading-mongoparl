@@ -155,7 +155,7 @@ export function Chart02({
               dataKey="month"
               tickLine={false}
               tickMargin={12}
-              tickFormatter={(value) => value.slice(0, 3)}
+              tickFormatter={(value) => String(new Date(value).getDate())}
               stroke="var(--border)"
             />
             <YAxis
