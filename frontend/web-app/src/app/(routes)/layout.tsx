@@ -22,7 +22,7 @@ export default function RootLayout({
       <LayoutContainer>
         <main className="h-screen flex flex-col">
           <AppNavbar />
-          <div className="flex-1">{children}</div>
+          <div className="flex-1 py-4">{children}</div>
         </main>
       </LayoutContainer>
     </SidebarProvider>

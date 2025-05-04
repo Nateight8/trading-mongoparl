@@ -66,6 +66,30 @@ export const userTypeDefs = gql`
     updateUsername(username: String!): UpdateUserResponse
 
     deleteUser: Boolean!
+
+    onboardUser(input: OnboardUserInput!): OnboardUserResponse!
+  }
+
+  input OnboardUserInput {
+    accountName: String!
+    broker: String!
+    accountCurrency: String!
+    maxDailyDrawdown: Float!
+    maxTotalDrawdown: Float!
+    accountSize: String!
+    riskPerTrade: Float!
+    maxDailyRisk: Float!
+    tradingStyle: String!
+    riskRewardRatio: String!
+    timeZone: String!
+    maxOpenTrades: Int!
+    tradingSessions: [String!]!
+    planNote: String
+  }
+
+  type OnboardUserResponse {
+    success: Boolean!
+    message: String
   }
 `;
 

@@ -14,43 +14,42 @@ This project is an AI-powered trading journal web application designed to help t
    - Session management and secure authentication
    - User data storage and retrieval
 
-2. **Trade Entry API**
+2. **Unified User Onboarding API**
+
+   - After authentication, users complete onboarding in a single step
+   - Onboarding collects:
+     - Trading account details (name, broker, currency, size, drawdown limits)
+     - Risk settings (risk per trade, max daily risk, max open trades, risk/reward ratio)
+     - Trading plan (style, sessions, plan note)
+   - All onboarding data is saved atomically and user is marked as onboarded
+
+3. **Trade Entry API**
 
    - Endpoints to create, read, update, and delete trade entries
-   - Data validation and persistence (instrument, prices, size, date/time, direction, result, notes/tags)
+   - Support for manual and AI-assisted trade journaling
 
-3. **AI Integration API**
+4. **Analytics API**
 
-   - Endpoint for AI-powered trade journaling (parsing natural language input)
-   - AI suggestion/confirmation workflow
+   - Endpoints to fetch trade statistics, performance, and risk analytics
 
-4. **Journal History API**
-
-   - Endpoints to fetch, filter, edit, and delete trade logs
-   - Filtering by date, result, or tag
-
-5. **Analytics API**
-
-   - Endpoints to provide trade statistics (count, win rate, risk/reward)
-   - Data for charts (equity curve, win/loss ratio)
-
-6. **(Optional/Stretch)**
-   - Tagging, screenshot upload endpoints
-   - Export (CSV/PDF) endpoints
+5. **Security & Session Management**
+   - Secure session handling for all endpoints
+   - Protected routes for authenticated users only
 
 ### Client-side (Frontend) MVP
 
-See [`frontend/web/MVP.md`](frontend/web/MVP.md) for the full client-side MVP feature list and details.
+See `frontend/web/MVP.md` for details.
 
 ## Roadmap
 
-- [x] User authentication (email/password, OAuth)
-- [x] Manual trade entry and journal history
-- [x] AI chat-based journaling
-- [ ] Basic analytics and charts
-- [ ] Filtering and editing journal entries
-- [ ] Tagging and screenshot uploads (stretch)
-- [ ] Export functionality (CSV/PDF) (stretch)
+- AI-powered journaling and suggestions
+- Advanced analytics and charting
+- Multi-account support
+- Social/trader sharing features
+
+---
+
+**Note:** The onboarding flow is now a single, atomic step after authentication, replacing the previous multi-step account creation process.
 
 ## Getting Started
 

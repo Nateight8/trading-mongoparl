@@ -10,6 +10,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useMutation } from "@apollo/client";
+import onboardOperations from "@/graphql/operations/onboard";
 
 export const onboardingSchema = z.object({
   // Step 2
@@ -22,18 +24,18 @@ export const onboardingSchema = z.object({
   accountSize: z.string().min(1, "Account size is required"),
 
   // Step 3
-  riskPerTrade: z.string().min(1, "Required"),
-  maxDailyRisk: z.string().min(1, "Required"),
+  riskPerTrade: z.coerce.number().min(0, "Required"),
+  maxDailyRisk: z.coerce.number().min(0, "Required"),
   tradingStyle: z.string().min(1, "Required"),
   riskRewardRatio: z.string().min(1, "Required"),
   timeZone: z.string().min(1, "Required"),
+  maxOpenTrades: z.coerce.number().int().min(1, "Required"),
 
   // Step 4
   tradingSessions: z.array(z.string()).min(1, "Select at least one session"),
-  maxTradesPerDay: z.string().min(1, "Required"),
-  consecutiveLosses: z.string().min(1, "Required"),
-  weeklyProfitTarget: z.string().min(1, "Required"),
-  strategy: z.string().min(1, "Required"),
+  // maxTradesPerDay: z.string().min(1, "Required"),
+  // consecutiveLosses: z.string().min(1, "Required"),
+  planNote: z.string().min(1, "Required"),
 });
 
 export type OnboardingForm = z.infer<typeof onboardingSchema>;
@@ -52,16 +54,16 @@ export default function Onboard() {
       maxDailyDrawdown: 0,
       maxTotalDrawdown: 0,
       accountSize: "",
-      riskPerTrade: "",
-      maxDailyRisk: "",
+      riskPerTrade: 0,
+      maxDailyRisk: 0,
       tradingStyle: "",
       riskRewardRatio: "",
       timeZone: "",
+      maxOpenTrades: 0,
       tradingSessions: [],
-      maxTradesPerDay: "",
-      consecutiveLosses: "",
-      weeklyProfitTarget: "",
-      strategy: "",
+      // maxTradesPerDay: "",
+      // consecutiveLosses: "",
+      planNote: "",
     },
   });
 
@@ -82,13 +84,13 @@ export default function Onboard() {
       "tradingStyle",
       "riskRewardRatio",
       "timeZone",
+      "maxOpenTrades",
     ], // step 3
     [
       "tradingSessions",
-      "maxTradesPerDay",
-      "consecutiveLosses",
-      "weeklyProfitTarget",
-      "strategy",
+      // "maxTradesPerDay",
+      // "consecutiveLosses",
+      "planNote",
     ], // step 4
   ];
 
@@ -103,8 +105,12 @@ export default function Onboard() {
     }
   };
 
+  const [onboardUser] = useMutation(
+    onboardOperations.Mutations.createOnboarding
+  );
+
   const onSubmit = (data: OnboardingForm) => {
-    console.log("Form submitted!", data);
+    onboardUser({ variables: { input: data } });
   };
 
   return (

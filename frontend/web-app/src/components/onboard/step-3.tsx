@@ -41,12 +41,12 @@ export default function Step3({
   form: UseFormReturn<OnboardingForm>;
 }) {
   return (
-    <div className="w-full max-w-xl mx-auto">
+    <div className="w-full max-w-xl mx-auto py-20">
       <div className="space-y-6">
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">Your Trading Plan</h1>
+          <h1 className="text-2xl font-bold">Risk Management </h1>
           <p className="text-muted-foreground">
-            Define guidelines for consistent trading performance.
+            Risk management parameters and trading style preferences
           </p>
         </div>
         <FormFields form={form} />
@@ -109,32 +109,51 @@ export function FormFields({ form }: { form: UseFormReturn<OnboardingForm> }) {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="maxDailyRisk"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Max Daily Risk (%)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="eg: 1%"
-                      className="bg-background"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Maximum loss allowed in a single day
-                  </FormDescription>
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="maxDailyRisk"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Max Daily Risk (%)</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="eg: 1%"
+                        className="bg-background"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Maximum loss allowed in a single day
+                    </FormDescription>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="maxOpenTrades"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Max Open Trades</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="eg: 1%"
+                        className="bg-background"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Limits number of positions at a time
+                    </FormDescription>
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
         </div>
       </div>
       <div className="bg-muted/90 rounded-lg border border-dashed border-border p-4 mb-4">
-        <h3 className="text-sm font-semibold mb-2">
-          Account Rules (Breach = Account Failure)
-        </h3>
+        <h3 className="text-sm font-semibold mb-2">Trading Rules</h3>
         <div className="grid grid-cols-2 gap-4 py-4">
           <FormField
             control={form.control}

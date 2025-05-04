@@ -8,7 +8,6 @@ import {
   FormControl,
   FormDescription,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
 import type { OnboardingForm } from "./onboard";
@@ -28,11 +27,9 @@ export default function Step4({
     <div className="w-full max-w-xl mx-auto py-20">
       <div className="space-y-6">
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">
-            Trading Plan <span className="text-muted-foreground">(101)</span>
-          </h1>
+          <h1 className="text-2xl font-bold">Trading Execution & Goal</h1>
           <p className="text-muted-foreground">
-            Define guidelines for consistent trading performance.
+            Trading Execution Strategy & Profit Target
           </p>
         </div>
         <Step4Fields form={form} />
@@ -81,86 +78,20 @@ export function Step4Fields({ form }: { form: UseFormReturn<OnboardingForm> }) {
           );
         }}
       />
-      <div className="grid grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="maxTradesPerDay"
-          render={({ field }) => (
-            <FormItem className={formGroupClass}>
-              <FormLabel className={labelClass} htmlFor="maxTradesPerDay">
-                Max Trades Per Day
-              </FormLabel>
-              <FormControl>
-                <Input
-                  id="maxTradesPerDay"
-                  className={inputClass}
-                  type="text"
-                  placeholder="5"
-                  {...field}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="consecutiveLosses"
-          render={({ field }) => (
-            <FormItem className={formGroupClass}>
-              <FormLabel className={labelClass} htmlFor="consecutiveLosses">
-                Stop After Losses
-              </FormLabel>
-              <FormControl>
-                <Input
-                  id="consecutiveLosses"
-                  className={inputClass}
-                  type="text"
-                  placeholder="3"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Consecutive losses before stopping
-              </FormDescription>
-            </FormItem>
-          )}
-        />
-      </div>
-      <div className="p-4 bg-primary/10 rounded-lg border border-dashed border-primary/30">
-        <FormField
-          control={form.control}
-          name="weeklyProfitTarget"
-          render={({ field }) => (
-            <FormItem className={formGroupClass}>
-              <FormLabel className={labelClass} htmlFor="weeklyProfitTarget">
-                Weekly Profit Target (%)
-              </FormLabel>
-              <FormControl>
-                <Input
-                  id="weeklyProfitTarget"
-                  className={inputClass}
-                  type="text"
-                  placeholder="e.g. 10"
-                  {...field}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-      </div>
+
       <FormField
         control={form.control}
-        name="strategy"
+        name="planNote"
         render={({ field }) => (
           <FormItem className={formGroupClass}>
-            <FormLabel className={labelClass} htmlFor="strategy">
-              Strategy Notes
+            <FormLabel className={labelClass} htmlFor="planNote">
+              Note
             </FormLabel>
             <FormControl>
               <Textarea
-                id="strategy"
+                id="planNote"
                 className={`${inputClass} min-h-24`}
-                placeholder="Brief notes about your strategy (e.g., 'Trend following on 1H charts with 2:1 RR')"
+                placeholder="Brief notes about your plan (e.g., 'Trend following on 1H charts with 2:1 RR')"
                 {...field}
               />
             </FormControl>

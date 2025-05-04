@@ -31,7 +31,7 @@ export default function Step2({
     <div className="w-full max-w-xl mx-auto py-20">
       <div className="space-y-6">
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">Add Your First Trading Account</h1>
+          <h1 className="text-2xl font-bold">Trading Account</h1>
           <p className="text-muted-foreground">
             This enables personalized risk tracking.
           </p>

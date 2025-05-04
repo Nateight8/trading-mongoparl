@@ -24,6 +24,7 @@ import {
   RiSettings3Line,
   RiLeafLine,
   RiLogoutBoxLine,
+  RiBankFill,
 } from "@remixicon/react";
 import { Logo } from "./logo";
 
@@ -54,9 +55,9 @@ const data = {
           icon: RiScanLine,
         },
         {
-          title: "Trades",
-          url: "/trades",
-          icon: RiBardLine,
+          title: "Accounts",
+          url: "/accounts",
+          icon: RiBankFill,
         },
 
         {

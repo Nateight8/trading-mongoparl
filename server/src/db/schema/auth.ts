@@ -35,6 +35,7 @@ export const users = pgTable("user", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   participantId: varchar("participant_id", { length: 64 }),
+  providerAccountId: text("provider_account_id").unique(),
 });
 
 export const accounts = pgTable(
