@@ -1,4 +1,5 @@
 "use client";
+import { Account } from "@/components/account/assets";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -10,15 +11,7 @@ import {
 } from "@/components/ui/table";
 import { useRouter } from "next/navigation";
 
-type AccountStat = {
-  id: number;
-  name: string;
-  balance: number;
-  pnl: number;
-  winrate: number;
-};
-
-export default function AccountsTable({ data }: { data: AccountStat[] }) {
+export default function AccountsTable({ data }: { data: Account[] }) {
   const router = useRouter();
 
   return (
@@ -40,7 +33,7 @@ export default function AccountsTable({ data }: { data: AccountStat[] }) {
             {data.map((account) => (
               <TableRow
                 key={account.id}
-                className="border-none cursor-pointer hover:shadow-lg transition"
+                className="border-none cursor-pointer hover:shadow-lg  transition"
                 onClick={() => router.push(`/accounts/${account.id}`)}
                 tabIndex={0}
                 role="button"
@@ -50,13 +43,16 @@ export default function AccountsTable({ data }: { data: AccountStat[] }) {
                   {account.name}
                 </TableCell>
                 <TableCell className="text-muted-foreground hover:text-foreground border-none">
-                  {account.balance.toLocaleString()} USD
+                  {account.currentBalance.toLocaleString()} USD
                 </TableCell>
                 <TableCell className="text-muted-foreground hover:text-foreground border-none">
-                  {account.pnl.toLocaleString()} USD
+                  {account.pnl !== undefined
+                    ? account.pnl.toLocaleString()
+                    : "-"}{" "}
+                  USD
                 </TableCell>
                 <TableCell className="text-muted-foreground hover:text-foreground border-none">
-                  {account.winrate}%
+                  {account.winrate !== undefined ? account.winrate + "%" : "-"}
                 </TableCell>
               </TableRow>
             ))}

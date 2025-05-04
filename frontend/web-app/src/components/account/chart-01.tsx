@@ -19,7 +19,28 @@ import {
 import { CustomTooltipContent } from "@/components/account/tooltip";
 import { Badge } from "@/components/ui/badge";
 
-type ChartData = { month: string; actual: number; projected: number }[];
+interface ChartData {
+  month: string;
+  actual: number;
+  projected: number;
+}
+
+// overviewChart: {
+//     currentCapital: number;
+//     roi: number;
+//     chartData: {
+//         month: string;
+//         actual: number;
+//         projected: number;
+//     }[];
+// }
+
+interface OverviewChart {
+  name: string;
+  currentBalance: number;
+  roi: number;
+  chartData: ChartData[];
+}
 
 const chartConfig = {
   actual: {
@@ -74,21 +95,19 @@ function CustomCursor(props: CustomCursorProps) {
   );
 }
 
-export function Chart02({
+export function Chart01({
   name,
-  currentBalance,
-  roi,
-  chartData,
+  overviewData,
 }: {
   name: string;
-  currentBalance: number;
-  roi: number;
-  chartData: ChartData;
+  overviewData: OverviewChart;
 }) {
   const id = useId();
 
+  const { currentBalance, roi, chartData } = overviewData;
+
   return (
-    <Card className="gap-4 w-full hover:shadow-md cursor-pointer hover:bg-muted transition-all duration-300">
+    <Card className="gap-4 w-full hover:shadow-lg cursor-pointer hover:bg-muted transition-all duration-300">
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-0.5">
@@ -97,14 +116,8 @@ export function Chart02({
               <div className=" text-muted-foreground font-bold text-2xl">
                 $ {currentBalance.toLocaleString()}
               </div>
-              <Badge
-                className={`mt-1.5 border-none ${
-                  roi < 0
-                    ? "bg-destructive/20 text-destructive"
-                    : "bg-primary/24 text-primary"
-                }`}
-              >
-                {roi}%
+              <Badge className="mt-1.5 bg-primary/24 text-primary border-none">
+                +{roi}%
               </Badge>
             </div>
           </div>
@@ -155,7 +168,7 @@ export function Chart02({
               dataKey="month"
               tickLine={false}
               tickMargin={12}
-              tickFormatter={(value) => value.slice(0, 3)}
+              tickFormatter={(value) => String(new Date(value).getDate())}
               stroke="var(--border)"
             />
             <YAxis

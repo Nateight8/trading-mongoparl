@@ -1,10 +1,25 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Account from "./account";
 import AccountsTable from "@/app/(routes)/accounts/_components/accounts-table";
-import { IconCategory2, IconChartArea, IconTable } from "@tabler/icons-react";
+import { IconCategory2, IconChartArea, IconList } from "@tabler/icons-react";
 import Charts from "./charts";
 
-export default function Component() {
+export interface Account {
+  id: string;
+  name: string;
+  currentBalance: number;
+  roi?: number;
+  winrate?: number;
+  pnl?: number;
+
+  chartData?: {
+    month: string;
+    actual: number;
+    projected: number;
+  }[];
+}
+
+export default function Assets({ accounts }: { accounts: Account[] }) {
   return (
     <Tabs
       defaultValue="table"
@@ -25,15 +40,15 @@ export default function Component() {
         </TabsList>
       </div>
       <TabsContent value="table">
-        <AccountsTable data={accountStats} />
+        <AccountsTable data={accounts} />
       </TabsContent>
       <TabsContent value="charts">
-        <Charts />
+        <Charts accounts={accounts} />
       </TabsContent>
       <TabsContent value="grid">
         <div className="grid grid-cols-2 gap-4">
-          {accountStats.map((accountStat) => (
-            <Account key={accountStat.id} {...accountStat} />
+          {accounts.map((account) => (
+            <Account key={account.name} account={account} />
           ))}
         </div>
       </TabsContent>
@@ -45,7 +60,7 @@ const tabs = [
   {
     label: "Table",
     value: "table",
-    Icon: <IconTable />,
+    Icon: <IconList />,
   },
   {
     label: "Charts",
@@ -56,37 +71,5 @@ const tabs = [
     label: "Grid",
     value: "grid",
     Icon: <IconCategory2 />,
-  },
-];
-
-// Example account stats
-const accountStats = [
-  {
-    id: 1,
-    name: "FTMO Challenge",
-    balance: 10000,
-    pnl: 1200,
-    winrate: 62,
-  },
-  {
-    id: 2,
-    name: "Funded Next",
-    balance: 5000,
-    pnl: 300,
-    winrate: 55,
-  },
-  {
-    id: 3,
-    name: "Personal Account",
-    balance: 2000,
-    pnl: 150,
-    winrate: 48,
-  },
-  {
-    id: 4,
-    name: "Alpha Capitals",
-    balance: 25000,
-    pnl: 2500,
-    winrate: 70,
   },
 ];

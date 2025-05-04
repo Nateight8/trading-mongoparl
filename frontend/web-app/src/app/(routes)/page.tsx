@@ -1,6 +1,5 @@
 "use client";
 
-import Overview from "@/components/account/overview";
 // import { useQuery } from "@apollo/client";
 // import userOperations from "@/graphql/operations/user-operations";
 // import AddAccount from "@/components/account/add";
@@ -8,7 +7,8 @@ import Onboard from "@/components/onboard/onboard";
 import userOperations from "@/graphql/operations/user-operations";
 import { useQuery } from "@apollo/client";
 import { useRouter } from "next/navigation";
-import Assets from "@/components/account/assets";
+
+import Accounts from "@/components/account/accounts";
 export default function Home() {
   const { data, loading } = useQuery(userOperations.Querries.getLoggedInUser, {
     fetchPolicy: "network-only",
@@ -28,10 +28,5 @@ export default function Home() {
     return <Onboard />;
   }
 
-  return (
-    <div className=" w-full max-w-6xl mx-auto flex flex-col gap-6 ">
-      <Overview />
-      <Assets />
-    </div>
-  );
+  return <Accounts />;
 }
