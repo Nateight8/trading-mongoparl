@@ -10,7 +10,8 @@ import {
 import MetricCard from "./metric-card";
 import { PlusIcon } from "lucide-react";
 import { Button } from "../ui/button";
-import { Chart01 } from "./chart-01";
+// import { Chart01 } from "./chart-01";
+import { Chart03 } from "./chart-03";
 
 // Only the props needed for Overview
 interface OverviewProps {
@@ -70,7 +71,7 @@ export default function Overview({
           />
         </div>
       </div>
-      <Chart01
+      {/* <Chart01
         name={overview.name}
         overviewData={{
           name: overview.name,
@@ -78,7 +79,8 @@ export default function Overview({
           roi,
           chartData: overview.chartData,
         }}
-      />
+      /> */}
+      <Chart03 />
     </>
   );
 }
