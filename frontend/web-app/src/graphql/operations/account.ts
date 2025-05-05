@@ -2,22 +2,30 @@ import { gql } from "@apollo/client";
 
 const accountOperations = {
   Querries: {
-    getUserTradingAccounts: gql`
-      query GetUserTradingAccounts {
-        getUserTradingAccounts {
-          accountCurrency
-          accountName
-          accountSize
-          broker
-          createdAt
-          currentBalance
-          id
-          maxDailyDrawdown
-          maxTotalDrawdown
-          pnl
-          roi
-          updatedAt
-          winrate
+    userTradData: gql`
+      query UserTradeData {
+        userTradeData {
+          overview {
+            currentBalance
+            pnl
+            roi
+            winrate
+          }
+          accounts {
+            accountCurrency
+            accountName
+            accountSize
+            broker
+            createdAt
+            currentBalance
+            id
+            maxDailyDrawdown
+            maxTotalDrawdown
+            pnl
+            roi
+            updatedAt
+            winrate
+          }
         }
       }
     `,
@@ -55,26 +63,35 @@ const accountOperations = {
 };
 
 //types
+export interface PortfolioOverview {
+  __typename: "PortfolioOverview";
+  currentBalance: number;
+  pnl: number;
+  roi: number;
+  winrate: number;
+}
+
 export interface TradingAccount {
   __typename: "TradingAccount";
   id: string;
   accountName: string;
   broker: string;
   accountCurrency: string;
-  accountSize: string; // Note: this is a string, not a number
+  accountSize: string;
   currentBalance: number;
   pnl: number;
   roi: number;
   winrate: number;
   maxDailyDrawdown: number;
   maxTotalDrawdown: number;
-  createdAt: string; // This is a string timestamp (e.g., "1746469645265")
-  updatedAt: string; // This is a string timestamp (e.g., "1746469645265")
+  createdAt: string;
+  updatedAt: string;
 }
 
-interface TradingAccounts {
-  getUserTradingAccounts: TradingAccount[];
+export interface UserTradeData {
+  __typename: "UserTradeData";
+  overview: PortfolioOverview;
+  accounts: TradingAccount[];
 }
 
-export type { TradingAccount, TradingAccounts };
 export default accountOperations;

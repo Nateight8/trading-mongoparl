@@ -43,10 +43,30 @@ export const userTypeDefs = gql`
     user: User
   }
 
+  type PortfolioOverview {
+    currentBalance: Float!
+    roi: Float!
+    pnl: Float!
+    winrate: Float!
+    chartData: [ChartPoint!]!
+  }
+
+  type ChartPoint {
+    month: String!
+    actual: Float!
+    projected: Float!
+  }
+
+  type UserTradeData {
+    overview: PortfolioOverview!
+    accounts: [TradingAccount!]!
+  }
+
   type Query {
     getLoggedInUser: GetLoggedInUserReturn
     getAllUsers: GetAllUsersResponse
     checkUsernameAvailability(username: String!): Boolean!
+    userTradeData: UserTradeData!
   }
 
   type Mutation {

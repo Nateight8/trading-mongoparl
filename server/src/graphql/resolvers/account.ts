@@ -24,23 +24,6 @@ const accountResolvers = {
       if (!account) throw new GraphQLError("Account not found");
       return account;
     },
-
-    /**
-     * Fetch all trading accounts for the logged-in user
-     */
-    async getUserTradingAccounts(_: any, _args: any, context: GraphqlContext) {
-      const { db, session } = context;
-      if (!session?.id) throw new GraphQLError("Not authenticated");
-      try {
-        const accounts = await db.query.tradingAccounts.findMany({
-          where: eq(tradingAccounts.userId, session.id),
-        });
-        return Array.isArray(accounts) ? accounts : [];
-      } catch (e) {
-        // Optionally log the error
-        return [];
-      }
-    },
   },
 
   Mutation: {

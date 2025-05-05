@@ -2,8 +2,9 @@
 import { useQuery } from "@apollo/client";
 import Assets from "./assets";
 // import Overview from "./overview";
-import accountOperations from "@/graphql/operations/account";
-import { TradingAccounts } from "@/graphql/operations/account";
+import accountOperations, { UserTradeData } from "@/graphql/operations/account";
+
+import Overview from "./overview";
 
 export default function Accounts() {
   // TODO: get user's accounts from the database
@@ -11,8 +12,8 @@ export default function Accounts() {
     data: accounts,
     loading,
     // error,
-  } = useQuery<TradingAccounts>(
-    accountOperations.Querries.getUserTradingAccounts,
+  } = useQuery<{ userTradeData: UserTradeData }>(
+    accountOperations.Querries.userTradData,
     {
       fetchPolicy: "network-only",
     }
@@ -20,14 +21,21 @@ export default function Accounts() {
 
   if (loading) return <div>Loading...</div>;
 
+  const overview = accounts?.userTradeData.overview;
+  // const accounts = accounts?.userTradeData.accounts;
+
   return (
     <div className=" w-full max-w-7xl mx-auto flex flex-col gap-6 ">
-      {/* <Overview
-        currentCapital={traderData.currentCapital}
-        roi={traderData.roi}
-        overview={traderData.overview}
-      /> */}
-      <Assets accounts={accounts} />
+      <Overview
+        currentCapital={overview?.currentBalance ?? 0}
+        roi={overview?.roi ?? 0}
+        overview={
+          overview
+            ? { ...overview, name: "Portfolio Overview", chartData: [] }
+            : { name: "Portfolio Overview", chartData: [] }
+        }
+      />
+      {/* <Assets accounts={accounts} /> */}
     </div>
   );
 }

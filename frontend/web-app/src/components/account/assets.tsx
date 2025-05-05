@@ -7,7 +7,7 @@ import {
   IconList,
   IconPlus,
 } from "@tabler/icons-react";
-import Charts from "./charts";
+// import Charts from "./charts";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 import { TradingAccounts } from "@/graphql/operations/account";

@@ -4,6 +4,7 @@ import { conversationResolvers } from "./conversation.js";
 import { participantsResolvers } from "./participants.js";
 import onboardUserResolver from "./onboard-user.js";
 import accountResolvers from "./account.js";
+import tradeDataResolvers from "./trade-data.js";
 
 // import listenersResolvers from "./listeners.js";
 
@@ -13,7 +14,8 @@ const resolvers = merge(
   conversationResolvers,
   participantsResolvers,
   onboardUserResolver,
-  accountResolvers
+  accountResolvers,
+  tradeDataResolvers
 );
 
 export default resolvers;

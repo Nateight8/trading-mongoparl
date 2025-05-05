@@ -25,7 +25,6 @@ export const tradingAccountTypeDefs = gql`
 
   type Query {
     getTradingAccount(id: ID!): TradingAccount
-    getUserTradingAccounts: [TradingAccount!]!
   }
 
   type Mutation {
