@@ -1,5 +1,5 @@
 "use client";
-import { Account } from "@/components/account/assets";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -10,8 +10,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useRouter } from "next/navigation";
+import { TradingAccount } from "@/graphql/operations/account";
 
-export default function AccountsTable({ data }: { data: Account[] }) {
+export default function AccountsTable({
+  data,
+}: {
+  data: TradingAccount[] | undefined;
+}) {
   const router = useRouter();
 
   return (
@@ -30,26 +35,27 @@ export default function AccountsTable({ data }: { data: Account[] }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((account) => (
+            {data?.map((account) => (
               <TableRow
                 key={account.id}
                 className="border-none cursor-pointer hover:shadow-lg  transition"
                 onClick={() => router.push(`/accounts/${account.id}`)}
                 tabIndex={0}
                 role="button"
-                aria-label={`View account ${account.name}`}
+                aria-label={`View account ${account.accountName}`}
               >
                 <TableCell className="font-medium text-muted-foreground hover:text-foreground capitalize border-none">
-                  {account.name}
+                  {account.accountName}
                 </TableCell>
                 <TableCell className="text-muted-foreground hover:text-foreground border-none">
-                  {account.currentBalance.toLocaleString()} USD
+                  {account.currentBalance.toLocaleString()}{" "}
+                  {account.accountCurrency}
                 </TableCell>
                 <TableCell className="text-muted-foreground hover:text-foreground border-none">
                   {account.pnl !== undefined
                     ? account.pnl.toLocaleString()
                     : "-"}{" "}
-                  USD
+                  {account.accountCurrency}
                 </TableCell>
                 <TableCell className="text-muted-foreground hover:text-foreground border-none">
                   {account.winrate !== undefined ? account.winrate + "%" : "-"}

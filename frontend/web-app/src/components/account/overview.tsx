@@ -80,7 +80,7 @@ export default function Overview({
           chartData: overview.chartData,
         }}
       /> */}
-      <Chart03 />
+      <Chart03 name={overview.name} currentBalance={currentCapital} roi={roi} />
     </>
   );
 }

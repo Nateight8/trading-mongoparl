@@ -1,0 +1,1 @@
+ALTER TABLE "trading_accounts" ALTER COLUMN "id" SET DATA TYPE varchar(32);

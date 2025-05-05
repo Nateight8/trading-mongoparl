@@ -7,6 +7,7 @@ import {
   riskSettings,
   tradingPlans,
 } from "@/db/schema";
+import { Snowflake } from "@theinternetfolks/snowflake";
 
 export interface OnboardUserInput {
   accountName: string;
@@ -53,28 +54,23 @@ const onboardUserResolver = {
       }
 
       // Upsert trading account
-      await db
-        .insert(tradingAccounts)
-        .values({
-          userId: session.id,
-          accountName: input.accountName,
-          broker: input.broker,
-          accountCurrency: input.accountCurrency,
-          maxDailyDrawdown: input.maxDailyDrawdown,
-          maxTotalDrawdown: input.maxTotalDrawdown,
-          accountSize: input.accountSize,
-        })
-        .onConflictDoUpdate({
-          target: [tradingAccounts.userId],
-          set: {
-            accountName: input.accountName,
-            broker: input.broker,
-            accountCurrency: input.accountCurrency,
-            maxDailyDrawdown: input.maxDailyDrawdown,
-            maxTotalDrawdown: input.maxTotalDrawdown,
-            accountSize: input.accountSize,
-          },
-        });
+      const prefix = input.accountName
+        .replace(/[^a-zA-Z0-9]/g, "")
+        .slice(0, 4)
+        .toLowerCase();
+      const snowflake = Snowflake.generate();
+      const uniqueId = `${prefix}${snowflake}`;
+      await db.insert(tradingAccounts).values({
+        id: uniqueId,
+        userId: session.id,
+        accountName: input.accountName,
+        broker: input.broker,
+        accountCurrency: input.accountCurrency,
+        maxDailyDrawdown: input.maxDailyDrawdown,
+        maxTotalDrawdown: input.maxTotalDrawdown,
+        accountSize: input.accountSize,
+        currentBalance: Number(input.accountSize),
+      });
 
       // Upsert risk settings
       await db

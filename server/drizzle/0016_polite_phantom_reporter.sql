@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS "trading_accounts_user_id_unique";

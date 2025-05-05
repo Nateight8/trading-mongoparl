@@ -4,17 +4,18 @@ export const metadata: Metadata = {
   title: "Experiment 03 - Crafted.is",
 };
 
-import { Chart02 } from "./chart-02";
-import { Account } from "./assets";
+// import { Chart02 } from "./chart-02";
+import { TradingAccount } from "@/graphql/operations/account";
+import { Chart03 } from "./chart-03";
 
-export default function Charts({ accounts }: { accounts: Account[] }) {
+export default function Charts({ accounts }: { accounts: TradingAccount[] }) {
   const chartDataSets = accounts.map((account) => ({
-    name: account.name,
+    name: account.accountName,
     currentBalance: account.currentBalance,
     roi: account.roi,
     winrate: account.winrate,
     pnl: account.pnl,
-    chartData: account.chartData,
+    // chartData: account.chartData,
   }));
 
   return (
@@ -23,12 +24,19 @@ export default function Charts({ accounts }: { accounts: Account[] }) {
         <div className="">
           <div className="grid gap-4 py-4 auto-rows-min @2xl:grid-cols-2 ">
             {chartDataSets?.map((account) => (
-              <Chart02
+              // <Chart02
+              //   key={account.name}
+              //   name={account.name}
+              //   currentBalance={account.currentBalance}
+              //   roi={account.roi ?? 0}
+              //   chartData={account.chartData ?? []}
+              // />
+              <Chart03
                 key={account.name}
                 name={account.name}
                 currentBalance={account.currentBalance}
-                roi={account.roi ?? 0}
-                chartData={account.chartData ?? []}
+                roi={account.roi}
+                // chartData={account.chartData ?? []}
               />
             ))}
           </div>
