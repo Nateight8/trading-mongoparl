@@ -7,6 +7,7 @@ import {
   timestamp,
   jsonb,
   primaryKey,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 import { users } from "./auth";
 import { tradingAccounts } from "./account";
@@ -28,6 +29,16 @@ import { tradingAccounts } from "./account";
  * - canceled: Trade was planned but never executed
  * - stopped: Trade was stopped out at stop loss
  */
+
+// Define enum for execution style
+export const executionStyleEnum = pgEnum("execution_style", [
+  "market",
+  "buy_limit",
+  "sell_limit",
+  "buy_stop",
+  "sell_stop",
+]);
+
 export const trades = pgTable("trades", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: text("user_id")
@@ -38,22 +49,33 @@ export const trades = pgTable("trades", {
     .references(() => tradingAccounts.id),
   symbol: varchar("symbol", { length: 20 }).notNull(),
   side: varchar("side", { length: 10 }).notNull(),
-  entryPrice: decimal("entry_price", { precision: 20, scale: 8 }).notNull(),
-  entryTimestamp: timestamp("entry_timestamp").notNull(),
+  executionStyle: executionStyleEnum("execution_style").notNull(),
+  plannedEntryPrice: decimal("planned_entry_price", {
+    precision: 20,
+    scale: 8,
+  }).notNull(),
+  executedEntryPrice: decimal("executed_entry_price", {
+    precision: 20,
+    scale: 8,
+  }),
   size: decimal("size", { precision: 20, scale: 8 }).notNull(),
   initialStopLoss: decimal("initial_stop_loss", {
+    precision: 20,
+    scale: 8,
+  }).notNull(),
+  initialTakeProfit: decimal("initial_take_profit", {
     precision: 20,
     scale: 8,
   }).notNull(),
   initialRiskAmount: decimal("initial_risk_amount", {
     precision: 20,
     scale: 8,
-  }).notNull(),
+  }),
   initialRiskPercentage: decimal("initial_risk_percentage", {
     precision: 10,
     scale: 4,
-  }).notNull(),
-  rPerPip: decimal("r_per_pip", { precision: 20, scale: 8 }).notNull(),
+  }),
+  rPerPip: decimal("r_per_pip", { precision: 20, scale: 8 }),
   status: varchar("status", { length: 20 }).notNull().default("planned"),
   remainingSize: decimal("remaining_size", {
     precision: 20,
@@ -84,7 +106,10 @@ export const tradeTargets = pgTable("trade_targets", {
     .notNull()
     .references(() => trades.id),
   label: varchar("label", { length: 50 }).notNull(),
-  price: decimal("price", { precision: 20, scale: 8 }).notNull(),
+  executedPrice: decimal("executed_price", {
+    precision: 20,
+    scale: 8,
+  }).notNull(),
   riskReward: decimal("risk_reward", { precision: 10, scale: 4 }).notNull(),
   exitSize: decimal("exit_size", { precision: 20, scale: 8 }).notNull(),
   moveStopTo: decimal("move_stop_to", { precision: 20, scale: 8 }),
@@ -144,3 +169,5 @@ export const tradeScenarios = pgTable("trade_scenarios", {
   }).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export type TradeTargetInsert = typeof tradeTargets.$inferInsert;

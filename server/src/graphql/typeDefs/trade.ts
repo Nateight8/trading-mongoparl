@@ -1,6 +1,35 @@
 import { gql } from "graphql-tag";
 
-export const tradeLogTypeDefs = gql`
+/**
+ * Robust Trade Design: Planned vs. Executed Values
+ *
+ * Yes, this is starting to make a lot of sense and is a strong design for a robust trading journal/tracker!
+ *
+ * Summary of your approach:
+ * - You distinguish between the user's planned values (initialEntryPrice, initialTakeProfit, initialStopLoss)
+ *   and the actual executed/triggered values (executedEntryPrice, executedTakeProfit, triggeredStopLoss).
+ * - This allows you to track both the plan and the real-world execution, which is crucial for performance analysis,
+ *   discipline tracking, and understanding slippage or execution differences.
+ *
+ * Benefits:
+ * - Enables analytics on plan vs. reality (e.g., "How often do I enter at my planned price?").
+ * - Supports all trading styles (market, limit, stop, etc.).
+ * - Makes the system flexible for both discretionary and systematic traders.
+ */
+
+export const tradeTypeDefs = gql`
+  # --- Enums ---
+  """
+  Enum for trade execution style
+  """
+  enum ExecutionStyle {
+    MARKET
+    BUY_LIMIT
+    SELL_LIMIT
+    BUY_STOP
+    SELL_STOP
+  }
+
   # --- Core Trade Types ---
 
   """
@@ -29,13 +58,17 @@ export const tradeLogTypeDefs = gql`
     """
     side: String!
     """
-    Entry price of the trade
+    Execution style of the trade
     """
-    entryPrice: Float!
+    executionStyle: ExecutionStyle!
     """
-    Timestamp when trade was entered
+    Initial entry price of the trade
     """
-    entryTimestamp: String!
+    initialEntry: Float!
+    """
+    Executed entry price of the trade
+    """
+    executedEntryPrice: Float
     """
     Initial position size
     """
@@ -45,17 +78,29 @@ export const tradeLogTypeDefs = gql`
     """
     initialStopLoss: Float!
     """
+    Triggered stop loss price (actual stop loss that was hit)
+    """
+    triggeredStopLoss: Float
+    """
+    Initial take profit price
+    """
+    initialTakeProfit: Float!
+    """
+    Executed take profit price (actual take profit that was hit)
+    """
+    executedTakeProfit: Float
+    """
     Initial risk amount in account currency
     """
-    initialRiskAmount: Float!
+    initialRiskAmount: Float
     """
     Initial risk as percentage of account
     """
-    initialRiskPercentage: Float!
+    initialRiskPercentage: Float
     """
     Risk per pip calculation
     """
-    rPerPip: Float!
+    rPerPip: Float
     """
     Current trade status
     """
@@ -122,6 +167,10 @@ export const tradeLogTypeDefs = gql`
     Label/name of the target
     """
     label: String!
+    """
+    Planned exit price for the target
+    """
+    executedPrice: Float
     """
     Target price level
     """
@@ -225,10 +274,11 @@ export const tradeLogTypeDefs = gql`
   # --- Input Types ---
 
   input TradeTargetInput {
-    label: String!
-    price: Float!
-    riskReward: Float!
-    exitSize: Float!
+    executedPrice: Float
+    riskReward: Float
+    label: String
+    price: Float
+    exitSize: Float
     moveStopTo: Float
   }
 
@@ -236,13 +286,14 @@ export const tradeLogTypeDefs = gql`
     accountId: ID!
     symbol: String!
     side: String!
-    entryPrice: Float!
-    entryTimestamp: String!
+    executionStyle: ExecutionStyle!
+    plannedEntryPrice: Float!
+    executedEntryPrice: Float
     size: Float!
     initialStopLoss: Float!
-    initialRiskAmount: Float!
-    initialRiskPercentage: Float!
-    rPerPip: Float!
+    triggeredStopLoss: Float
+    initialTakeProfit: Float!
+    executedTakeProfit: Float
     setupType: String
     timeframe: String
     notes: String
@@ -311,5 +362,52 @@ export const tradeLogTypeDefs = gql`
     recordTradeOutcome(input: TradeOutcomeInput!): TradeOutcome!
     addTradeTarget(tradeId: ID!, input: TradeTargetInput!): TradeTarget!
     updateTradeStopLoss(tradeId: ID!, newStopLoss: Float!): Trade!
+    createTradePlan(input: TradePlanInput!): TradePlan!
+    executeTradePlan(
+      tradePlanId: ID!
+      executionInput: TradeExecutionInput!
+    ): Trade!
+  }
+
+  """
+  Trade plan type representing a planned trade before execution
+  """
+  type TradePlan {
+    id: ID!
+    userId: ID!
+    accountId: ID!
+    plannedEntryPrice: Float!
+    plannedStopLoss: Float!
+    plannedTakeProfit: Float!
+    size: Float!
+    setupType: String
+    timeframe: String
+    notes: String
+    tags: [String!]
+    targets: [TradeTarget!]
+    status: String!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  input TradePlanInput {
+    accountId: ID!
+    plannedEntryPrice: Float!
+    plannedStopLoss: Float!
+    plannedTakeProfit: Float!
+    size: Float!
+    setupType: String
+    timeframe: String
+    notes: String
+    tags: [String!]
+    targets: [TradeTargetInput]
+    executionStyle: ExecutionStyle
+  }
+
+  input TradeExecutionInput {
+    executedEntryPrice: Float!
+    executedTakeProfit: Float
+    triggeredStopLoss: Float
+    executionStyle: ExecutionStyle!
   }
 `;

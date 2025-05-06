@@ -1,5 +1,31 @@
 # Flexible Trade Tracking System
 
+## User Stories
+
+### 1. Market Execution Trader
+
+As a trader who enters at market price, I want to plan my entry, stop loss, and take profit in advance, but record my actual entry price when I execute, so I can compare my plan to my real execution and analyze my discipline.
+
+### 2. Limit/Stop Order Trader
+
+As a trader who uses limit or stop orders, I want to specify my intended entry price and execution style, so the system can track whether my order was filled as planned or if I had to adjust my entry.
+
+### 3. Risk-First Trader
+
+As a trader focused on risk management, I want to specify my planned stop loss and take profit, and have the system calculate my risk amount and risk percentage automatically, so I can ensure my trades fit my risk rules without manual calculation.
+
+### 4. Multi-Target/Scale-Out Trader
+
+As a trader who scales out at multiple targets, I want to define several take profit levels and partial exit sizes, so I can track my trade management and see how different exit strategies affect my results.
+
+### 5. Scenario Planner
+
+As a trader who likes to plan for different outcomes, I want the system to generate possible scenarios based on my targets and stops, so I can visualize best/worst/expected cases before I enter a trade.
+
+### 6. Performance Analyst
+
+As a trader who reviews my performance, I want to see analytics comparing my planned entries and exits to my actual results, so I can identify areas for improvement in my execution and planning.
+
 ## System Overview
 
 The Flexible Trade Tracking System is designed to accommodate diverse trading styles and strategies through a two-phase model:
@@ -25,19 +51,19 @@ interface TradeEntry {
 
   // Entry details
   side: "buy" | "sell"; // Direction of the trade
-  entryPrice: number; // Entry price
-  entryTimestamp: Date; // When the position was entered
+  executionStyle: "market" | "limit" | "stop"; // How the trade is intended to be executed
+  initialEntry: number; // Planned entry price (user's plan)
+  entryPrice?: number; // Actual entry price (set when trade is executed)
   size: number; // Initial position size
 
   // Risk management
-  initialStopLoss: number; // Initial stop loss price
-
-  initialRisk: {
-    // Risk calculations
-    amount: number; // Absolute risk amount
-    percentage: number; // Risk as percentage of account
-    rPerPip: number; // R-value per pip movement
-  };
+  initialStopLoss: number; // Planned stop loss price (required)
+  initialTakeProfit: number; // Planned take profit price (required)
+  // initialRiskAmount is calculated from initialEntry and initialStopLoss
+  initialRiskAmount?: number; // Calculated, not required in input
+  initialRiskPercentage?: number; // Calculated, not required in input
+  // rPerPip is also calculated
+  rPerPip?: number;
 
   // Target management
   targets: [
@@ -46,17 +72,17 @@ interface TradeEntry {
       id: string; // Target identifier
       label: string; // User-defined label (e.g., "Minimum Target")
       price: number; // Target price
-      rr: number; // Risk:Reward ratio at this target
+      riskReward: number; // Risk:Reward ratio at this target
       exitSize: number; // Size to exit at this target (0-100%)
-      moveStopTo: number; // Optional price to move stop to when target hit
+      moveStopTo?: number; // Optional price to move stop to when target hit
     }
   ];
 
   // Strategy context
-  setupType: string; // Category of trade setup
-  timeframe: string; // Analysis timeframe
-  notes: string; // Trade rationale/plan
-  tags: string[]; // Custom categorization
+  setupType?: string; // Category of trade setup
+  timeframe?: string; // Analysis timeframe
+  notes?: string; // Trade rationale/plan
+  tags?: string[]; // Custom categorization
 
   // State tracking
   status: "planned" | "active" | "partially_closed" | "closed" | "canceled";
@@ -64,6 +90,21 @@ interface TradeEntry {
   currentStopLoss: number; // Current stop loss (may change during trade)
 }
 ```
+
+#### Rationale for Input Changes
+
+- **entryTimestamp**: Not required at trade creation; can be set when the trade is actually executed.
+- **initialRiskAmount, initialRiskPercentage, rPerPip**: These are calculated fields based on initialEntry, initialStopLoss, and size. They should not be required in the input.
+- **initialStopLoss**: Required in the input and must be present in both the schema and database.
+- **initialTakeProfit**: Required in the input and must be present in both the schema and database.
+- **initialEntry**: Required to capture the user's planned entry price, which may differ from the actual entryPrice if the execution style is market.
+- **executionStyle**: Required to specify how the user intends to enter the trade (market, limit, stop, etc.).
+
+This approach allows for:
+
+- More accurate tracking of the user's plan versus actual execution
+- Flexibility for different trading styles (market, limit, stop orders)
+- Automatic calculation of risk metrics
 
 ### 2. Trade Outcome Tracking
 
@@ -644,3 +685,35 @@ Multiple scenarios based on various combinations of targets hit and stop losses 
 4. Build trade visualization components
 5. Implement performance analytics
 6. Add user interface for trade management
+
+# Flexible Trade Tracking System
+
+## User Stories
+
+### 1. Market Execution Trader
+
+As a trader who enters at market price, I want to plan my entry, stop loss, and take profit in advance, but record my actual entry price when I execute, so I can compare my plan to my real execution and analyze my discipline.
+
+### 2. Limit/Stop Order Trader
+
+As a trader who uses limit or stop orders, I want to specify my intended entry price and execution style, so the system can track whether my order was filled as planned or if I had to adjust my entry.
+
+### 3. Risk-First Trader
+
+As a trader focused on risk management, I want to specify my planned stop loss and take profit, and have the system calculate my risk amount and risk percentage automatically, so I can ensure my trades fit my risk rules without manual calculation.
+
+### 4. Multi-Target/Scale-Out Trader
+
+As a trader who scales out at multiple targets, I want to define several take profit levels and partial exit sizes, so I can track my trade management and see how different exit strategies affect my results.
+
+### 5. Scenario Planner
+
+As a trader who likes to plan for different outcomes, I want the system to generate possible scenarios based on my targets and stops, so I can visualize best/worst/expected cases before I enter a trade.
+
+### 6. Performance Analyst
+
+As a trader who reviews my performance, I want to see analytics comparing my planned entries and exits to my actual results, so I can identify areas for improvement in my execution and planning.
+
+## System Overview
+
+// ... existing code ...
