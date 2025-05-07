@@ -23,11 +23,8 @@ export const tradeTypeDefs = gql`
   Enum for trade execution style
   """
   enum ExecutionStyle {
-    MARKET
-    BUY_LIMIT
-    SELL_LIMIT
-    BUY_STOP
-    SELL_STOP
+    market
+    limit
   }
 
   # --- Core Trade Types ---
@@ -64,11 +61,7 @@ export const tradeTypeDefs = gql`
     """
     Initial entry price of the trade
     """
-    initialEntry: Float!
-    """
-    Executed entry price of the trade
-    """
-    executedEntryPrice: Float
+    plannedEntryPrice: Float!
     """
     Initial position size
     """
@@ -78,29 +71,9 @@ export const tradeTypeDefs = gql`
     """
     initialStopLoss: Float!
     """
-    Triggered stop loss price (actual stop loss that was hit)
-    """
-    triggeredStopLoss: Float
-    """
     Initial take profit price
     """
     initialTakeProfit: Float!
-    """
-    Executed take profit price (actual take profit that was hit)
-    """
-    executedTakeProfit: Float
-    """
-    Initial risk amount in account currency
-    """
-    initialRiskAmount: Float
-    """
-    Initial risk as percentage of account
-    """
-    initialRiskPercentage: Float
-    """
-    Risk per pip calculation
-    """
-    rPerPip: Float
     """
     Current trade status
     """
@@ -129,18 +102,6 @@ export const tradeTypeDefs = gql`
     Custom tags for categorizing trades
     """
     tags: [String!]
-    """
-    Planned take profit targets
-    """
-    targets: [TradeTarget!]!
-    """
-    Actual trade outcomes/exits
-    """
-    outcomes: [TradeOutcome!]!
-    """
-    Possible trade scenarios
-    """
-    scenarios: [TradeScenario!]!
     """
     Timestamp when trade was created
     """
@@ -288,12 +249,9 @@ export const tradeTypeDefs = gql`
     side: String!
     executionStyle: ExecutionStyle!
     plannedEntryPrice: Float!
-    executedEntryPrice: Float
     size: Float!
     initialStopLoss: Float!
-    triggeredStopLoss: Float
     initialTakeProfit: Float!
-    executedTakeProfit: Float
     setupType: String
     timeframe: String
     notes: String
@@ -325,7 +283,7 @@ export const tradeTypeDefs = gql`
 
   type Query {
     trade(id: ID!): Trade
-    userTrades(userId: ID!, filter: TradeFilterInput): [Trade!]!
+    userTrades(accountId: ID!): [Trade!]!
     getTradesByAccount(accountId: ID!): [Trade!]!
     tradeScenarios(tradeId: ID!): [TradeScenario!]!
     accountAnalytics(accountId: ID!, timeframe: String!): AccountAnalytics!
@@ -336,6 +294,7 @@ export const tradeTypeDefs = gql`
     symbol: String
     dateFrom: String
     dateTo: String
+    accountId: ID
   }
 
   type AccountAnalytics {
@@ -357,12 +316,17 @@ export const tradeTypeDefs = gql`
     balance: Float!
   }
 
+  type TradePlanResponse {
+    success: Boolean!
+    message: String
+  }
+
   type Mutation {
     createTrade(input: TradeInput!): TradeResponse!
     recordTradeOutcome(input: TradeOutcomeInput!): TradeOutcome!
     addTradeTarget(tradeId: ID!, input: TradeTargetInput!): TradeTarget!
     updateTradeStopLoss(tradeId: ID!, newStopLoss: Float!): Trade!
-    createTradePlan(input: TradePlanInput!): TradePlan!
+    createTradePlan(input: TradePlanInput!): TradePlanResponse!
     executeTradePlan(
       tradePlanId: ID!
       executionInput: TradeExecutionInput!
@@ -392,10 +356,12 @@ export const tradeTypeDefs = gql`
 
   input TradePlanInput {
     accountId: ID!
+    symbol: String!
     plannedEntryPrice: Float!
-    plannedStopLoss: Float!
-    plannedTakeProfit: Float!
+    initialStopLoss: Float!
+    initialTakeProfit: Float!
     size: Float!
+    side: String!
     setupType: String
     timeframe: String
     notes: String

@@ -1,5 +1,6 @@
 import { trades, tradeTargets, TradeTargetInsert } from "@/db/schema/trade-log";
 import GraphqlContext from "@/types/types.utils";
+import { eq } from "drizzle-orm";
 import { GraphQLError } from "graphql";
 
 export interface TradeTargetInput {
@@ -81,37 +82,11 @@ const tradeResolvers = {
       { input }: { input: TradePlanInput },
       context: GraphqlContext
     ) {
+      console.log("createTradePlan called with input:", input);
       const { db, session } = context;
       if (!session?.id) throw new GraphQLError("Not authenticated");
 
       try {
-        // Validate core trade plan fields that are required for any trade
-        if (
-          !input.symbol ||
-          !input.side ||
-          !input.plannedEntryPrice ||
-          !input.initialStopLoss ||
-          !input.initialTakeProfit ||
-          !input.size
-        ) {
-          throw new GraphQLError("Missing required trade plan fields");
-        }
-
-        // Determine execution style, defaulting to 'market' if not provided or invalid
-        const allowedExecutionStyles = [
-          "market",
-          "buy_limit",
-          "sell_limit",
-          "buy_stop",
-          "sell_stop",
-        ];
-        let executionStyle = (input.executionStyle || "market").toLowerCase();
-        if (!allowedExecutionStyles.includes(executionStyle)) {
-          executionStyle = "market";
-        }
-
-        // Create the base trade plan record
-        // This establishes the foundation for any targets that may be added
         const [trade] = await db
           .insert(trades)
           .values({
@@ -128,74 +103,46 @@ const tradeResolvers = {
             notes: input.notes,
             tags: input.tags,
             status: "planned", // Initial status for all trade plans
-            executionStyle: executionStyle as
-              | "market"
-              | "buy_limit"
-              | "sell_limit"
-              | "buy_stop"
-              | "sell_stop", // Validated enum value
+            executionStyle: "market", // Validated enum value
             remainingSize: String(input.size), // Initially, remaining size equals total size
             currentStopLoss: String(input.initialStopLoss), // Initial stop loss becomes current
           })
           .returning();
-
-        // Handle optional trade targets
-        // If targets are provided, each must be complete with all required fields
-        const targets: (typeof tradeTargets.$inferSelect)[] = [];
-        if (input.targets?.length) {
-          const createdTargets = await Promise.all(
-            input.targets.map(async (target) => {
-              // Ensure all required target fields are provided
-              if (
-                !target.label ||
-                target.executedPrice === undefined ||
-                target.riskReward === undefined ||
-                target.exitSize === undefined
-              ) {
-                throw new GraphQLError("Incomplete target fields provided");
-              }
-
-              // Create the target record with proper type casting for numeric values
-              const [createdTarget] = await db
-                .insert(tradeTargets)
-                .values({
-                  tradeId: trade.id,
-                  label: target.label,
-                  executedPrice: String(target.executedPrice),
-                  riskReward: String(target.riskReward),
-                  exitSize: String(target.exitSize),
-                  moveStopTo:
-                    target.moveStopTo !== undefined &&
-                    target.moveStopTo !== null
-                      ? String(target.moveStopTo)
-                      : undefined,
-                } as TradeTargetInsert)
-                .returning();
-
-              return createdTarget;
-            })
-          );
-          targets.push(...createdTargets);
-        }
-
-        // Return the complete trade plan with any associated targets
-        return {
-          ...trade,
-          targets,
-        };
       } catch (error) {
+        console.error("Error inserting trade plan:", error);
         // Preserve custom GraphQL errors for validation failures
         if (error instanceof GraphQLError) {
           throw error;
         }
-
         // Log unexpected errors for debugging while keeping user message generic
-        console.error("Trade plan creation failed:", error);
-
         throw new GraphQLError(
           "Failed to create trade plan. Please try again later."
         );
       }
+      // Validate core trade plan fields that are required for any trade
+
+      return {
+        success: true,
+        message: "Trade plan created successfully!",
+      };
+    },
+  },
+
+  Query: {
+    userTrades: async (
+      _: unknown,
+      { accountId }: { accountId: string },
+      context: GraphqlContext
+    ) => {
+      const { db, session } = context;
+      if (!session?.id) throw new GraphQLError("Not authenticated");
+
+      // Get all trades for this account and user
+      const tradesList = await db.query.trades.findMany({
+        where: (trades, { eq, and }) =>
+          and(eq(trades.accountId, accountId), eq(trades.userId, session.id)),
+      });
+      return tradesList;
     },
   },
 };

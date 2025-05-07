@@ -33,10 +33,7 @@ import { tradingAccounts } from "./account";
 // Define enum for execution style
 export const executionStyleEnum = pgEnum("execution_style", [
   "market",
-  "buy_limit",
-  "sell_limit",
-  "buy_stop",
-  "sell_stop",
+  "limit",
 ]);
 
 export const trades = pgTable("trades", {
