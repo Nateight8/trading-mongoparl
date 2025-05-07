@@ -46,3 +46,25 @@ export const tradingPlans = pgTable("trading_plans", {
     .notNull(),
 });
 ```
+
+<!-- {
+  "accountId": "abc123",
+  "plannedEntryPrice": 1.2345,
+  "plannedStopLoss": 1.2000,
+  "plannedTakeProfit": 1.3000,
+  "size": 1000,
+  "setupType": "Breakout",
+  "timeframe": "H1",
+  "notes": "My plan for this trade",
+  "tags": ["trend", "breakout"],
+  "targets": [
+    {
+      "label": "TP1",
+      "executedPrice": 1.2500,
+      "riskReward": 2,
+      "exitSize": 500,
+      "moveStopTo": 1.2200
+    }
+  ],
+  "executionStyle": "BUY_LIMIT"
+} -->

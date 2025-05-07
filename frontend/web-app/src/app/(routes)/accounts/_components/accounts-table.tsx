@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { useRouter } from "next/navigation";
 import { TradingAccount } from "@/graphql/operations/account";
+import { formatBalance } from "@/lib/utils";
 
 export default function AccountsTable({
   data,
@@ -48,13 +49,11 @@ export default function AccountsTable({
                   {account.accountName}
                 </TableCell>
                 <TableCell className="text-muted-foreground hover:text-foreground border-none">
-                  {account.currentBalance.toLocaleString()}{" "}
+                  {formatBalance(account.currentBalance)}{" "}
                   {account.accountCurrency}
                 </TableCell>
                 <TableCell className="text-muted-foreground hover:text-foreground border-none">
-                  {account.pnl !== undefined
-                    ? account.pnl.toLocaleString()
-                    : "-"}{" "}
+                  {account.pnl !== undefined ? formatBalance(account.pnl) : "-"}{" "}
                   {account.accountCurrency}
                 </TableCell>
                 <TableCell className="text-muted-foreground hover:text-foreground border-none">

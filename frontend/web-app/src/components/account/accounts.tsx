@@ -9,7 +9,7 @@ import Overview from "./overview";
 export default function Accounts() {
   // TODO: get user's accounts from the database
   const {
-    data: accounts,
+    data,
     loading,
     // error,
   } = useQuery<{ userTradeData: UserTradeData }>(
@@ -21,8 +21,8 @@ export default function Accounts() {
 
   if (loading) return <div>Loading...</div>;
 
-  const overview = accounts?.userTradeData.overview;
-  // const accounts = accounts?.userTradeData.accounts;
+  const overview = data?.userTradeData.overview;
+  const accounts = data?.userTradeData.accounts;
 
   return (
     <div className=" w-full max-w-7xl mx-auto flex flex-col gap-6 ">
@@ -35,7 +35,7 @@ export default function Accounts() {
             : { name: "Portfolio Overview", chartData: [] }
         }
       />
-      {/* <Assets accounts={accounts} /> */}
+      <Assets accounts={accounts} />
     </div>
   );
 }

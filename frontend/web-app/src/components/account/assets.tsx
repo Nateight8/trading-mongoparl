@@ -10,7 +10,8 @@ import {
 // import Charts from "./charts";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
-import { TradingAccounts } from "@/graphql/operations/account";
+import { TradingAccount } from "@/graphql/operations/account";
+
 // export interface Account {
 //   id: string;
 //   name: string;
@@ -29,11 +30,11 @@ import { TradingAccounts } from "@/graphql/operations/account";
 export default function Assets({
   accounts,
 }: {
-  accounts: TradingAccounts | undefined;
+  accounts: TradingAccount[] | undefined;
 }) {
   const router = useRouter();
 
-  const tradingAccounts = accounts?.getUserTradingAccounts;
+  const tradingAccounts = accounts;
 
   return (
     <Tabs
