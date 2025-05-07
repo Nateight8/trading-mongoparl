@@ -2,37 +2,37 @@ import { gql } from "@apollo/client";
 
 const tradeOperations = {
   Querries: {
-    userTrades: gql`
-      query UserTrades($accountId: ID!) {
-        userTrades(accountId: $accountId) {
-          accountId
-          createdAt
-          currentStopLoss
-          executionStyle
-          id
-          initialStopLoss
-          initialTakeProfit
-          notes
+    loggedTrades: gql`
+      query LoggedTrades($accountId: ID!) {
+        loggedTrades(accountId: $accountId) {
+          instrument
+          plannedStopLoss
+          plannedTakeProfit
           plannedEntryPrice
-          remainingSize
+          notes
           setupType
           side
           size
           status
-          symbol
+          tags
+          timeframe
           updatedAt
           userId
+          id
+          executionStyle
+          createdAt
+          accountId
         }
       }
     `,
   },
 
   Mutations: {
-    createTradePlan: gql`
-      mutation CreateTradePlan($input: TradePlanInput!) {
-        createTradePlan(input: $input) {
-          message
+    logTrade: gql`
+      mutation LogTrade($input: LogTradeInput!) {
+        logTrade(input: $input) {
           success
+          message
         }
       }
     `,

@@ -28,7 +28,7 @@ export const TargetSchema = z.object({
 });
 
 export const LogFormSchema = z.object({
-  symbol: z.string().min(1, { message: "Symbol is required" }),
+  instrument: z.string().min(1, { message: "Instrument is required" }),
 
   plannedEntryPrice: z.preprocess(
     (val) => (val === "" ? undefined : Number(val)),
@@ -54,17 +54,16 @@ export const LogFormSchema = z.object({
       .number({ invalid_type_error: "Must be a number" })
       .gt(0, { message: "Size must be greater than 0" })
   ),
-  // setupType: z.string().min(1, { message: "Setup type is required" }),
-  // timeframe: z.string().min(1, { message: "Timeframe is required" }),
-  // notes: z.string().optional(),
-  // tags: z.array(z.string()).optional(),
-  // targets: z
-  //   .array(TargetSchema)
-  //   .min(1, { message: "At least one target is required" }),
   executionStyle: z.enum(["MARKET", "LIMIT"], {
     required_error: "Execution style is required",
   }),
   side: z.enum(["buy", "sell"], { required_error: "Side is required" }),
+
+  // Optional/nullable fields:
+  setupType: z.string().optional(),
+  timeframe: z.string().optional(),
+  notes: z.string().optional(),
+  tags: z.array(z.string()).optional(),
 });
 
 export function LogForm({ accountId }: { accountId: string }) {
@@ -80,24 +79,16 @@ export function LogForm({ accountId }: { accountId: string }) {
     },
   });
 
-  const [createTradePlan, { loading }] = useMutation(
-    tradeOperations.Mutations.createTradePlan
-  );
+  const [logTrade] = useMutation(tradeOperations.Mutations.logTrade);
 
   function onSubmit(data: z.infer<typeof LogFormSchema>) {
     console.log(data);
     console.log(accountId);
-    createTradePlan({
+    logTrade({
       variables: {
         input: {
           accountId,
-          plannedEntryPrice: data.plannedEntryPrice,
-          initialStopLoss: data.plannedStopLoss,
-          initialTakeProfit: data.plannedTakeProfit,
-          size: data.size,
-          executionStyle: data.executionStyle,
-          side: data.side,
-          symbol: data.symbol,
+          ...data,
         },
       },
     });
@@ -115,7 +106,7 @@ export function LogForm({ accountId }: { accountId: string }) {
       >
         <FormField
           control={form.control}
-          name="symbol"
+          name="instrument"
           render={({ field }) => (
             <FormItem>
               <FormControl>
