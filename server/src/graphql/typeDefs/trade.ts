@@ -23,8 +23,19 @@ export const tradeTypeDefs = gql`
   Enum for trade execution style
   """
   enum ExecutionStyle {
-    market
-    limit
+    MARKET
+    LIMIT
+    BUY_LIMIT
+    SELL_LIMIT
+    BUY_STOP
+    SELL_STOP
+  }
+
+  enum TradeStatus {
+    PENDING
+    OPEN
+    CLOSED
+    CANCELLED
   }
 
   # --- Core Trade Types ---
@@ -47,9 +58,9 @@ export const tradeTypeDefs = gql`
     """
     accountId: ID!
     """
-    Trading symbol/instrument
+    Trading instrument
     """
-    symbol: String!
+    instrument: String!
     """
     Trade direction (BUY/SELL)
     """
@@ -77,7 +88,7 @@ export const tradeTypeDefs = gql`
     """
     Current trade status
     """
-    status: String!
+    status: TradeStatus!
     """
     Remaining position size after partial exits
     """
@@ -245,7 +256,7 @@ export const tradeTypeDefs = gql`
 
   input TradeInput {
     accountId: ID!
-    symbol: String!
+    instrument: String!
     side: String!
     executionStyle: ExecutionStyle!
     plannedEntryPrice: Float!
@@ -291,7 +302,7 @@ export const tradeTypeDefs = gql`
 
   input TradeFilterInput {
     status: String
-    symbol: String
+    instrument: String
     dateFrom: String
     dateTo: String
     accountId: ID
@@ -321,12 +332,19 @@ export const tradeTypeDefs = gql`
     message: String
   }
 
+  type LogTradeResponse {
+    success: Boolean!
+    message: String
+  }
+
   type Mutation {
     createTrade(input: TradeInput!): TradeResponse!
     recordTradeOutcome(input: TradeOutcomeInput!): TradeOutcome!
     addTradeTarget(tradeId: ID!, input: TradeTargetInput!): TradeTarget!
     updateTradeStopLoss(tradeId: ID!, newStopLoss: Float!): Trade!
-    createTradePlan(input: TradePlanInput!): TradePlanResponse!
+
+    logTrade(input: LogTradeInput!): LogTradeResponse!
+
     executeTradePlan(
       tradePlanId: ID!
       executionInput: TradeExecutionInput!
@@ -354,9 +372,24 @@ export const tradeTypeDefs = gql`
     updatedAt: String!
   }
 
+  input LogTradeInput {
+    accountId: ID!
+    instrument: String!
+    side: String!
+    plannedEntryPrice: Float!
+    plannedStopLoss: Float!
+    plannedTakeProfit: Float!
+    size: Float!
+    setupType: String
+    timeframe: String
+    notes: String
+    tags: [String!]
+    executionStyle: ExecutionStyle
+  }
+
   input TradePlanInput {
     accountId: ID!
-    symbol: String!
+    instrument: String!
     plannedEntryPrice: Float!
     initialStopLoss: Float!
     initialTakeProfit: Float!

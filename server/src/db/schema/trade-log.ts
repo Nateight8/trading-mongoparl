@@ -32,62 +32,58 @@ import { tradingAccounts } from "./account";
 
 // Define enum for execution style
 export const executionStyleEnum = pgEnum("execution_style", [
-  "market",
-  "limit",
+  "MARKET",
+  "LIMIT",
+  "BUY_LIMIT",
+  "SELL_LIMIT",
+  "BUY_STOP",
+  "SELL_STOP",
+]);
+
+export const tradeStatusEnum = pgEnum("trade_status", [
+  "PENDING",
+  "OPEN",
+  "CLOSED",
+  "CANCELLED",
 ]);
 
 export const trades = pgTable("trades", {
   id: uuid("id").primaryKey().defaultRandom(),
+
   userId: text("user_id")
     .notNull()
     .references(() => users.id),
+
   accountId: text("account_id")
     .notNull()
     .references(() => tradingAccounts.id),
-  symbol: varchar("symbol", { length: 20 }).notNull(),
-  side: varchar("side", { length: 10 }).notNull(),
-  executionStyle: executionStyleEnum("execution_style").notNull(),
+
   plannedEntryPrice: decimal("planned_entry_price", {
     precision: 20,
     scale: 8,
   }).notNull(),
-  executedEntryPrice: decimal("executed_entry_price", {
+
+  plannedStopLoss: decimal("planned_stop_loss", {
     precision: 20,
     scale: 8,
-  }),
+  }).notNull(),
+
+  plannedTakeProfit: decimal("planned_take_profit", {
+    precision: 20,
+    scale: 8,
+  }).notNull(),
+
   size: decimal("size", { precision: 20, scale: 8 }).notNull(),
-  initialStopLoss: decimal("initial_stop_loss", {
-    precision: 20,
-    scale: 8,
-  }).notNull(),
-  initialTakeProfit: decimal("initial_take_profit", {
-    precision: 20,
-    scale: 8,
-  }).notNull(),
-  initialRiskAmount: decimal("initial_risk_amount", {
-    precision: 20,
-    scale: 8,
-  }),
-  initialRiskPercentage: decimal("initial_risk_percentage", {
-    precision: 10,
-    scale: 4,
-  }),
-  rPerPip: decimal("r_per_pip", { precision: 20, scale: 8 }),
-  status: varchar("status", { length: 20 }).notNull().default("planned"),
-  remainingSize: decimal("remaining_size", {
-    precision: 20,
-    scale: 8,
-  }).notNull(),
-  currentStopLoss: decimal("current_stop_loss", {
-    precision: 20,
-    scale: 8,
-  }).notNull(),
   setupType: varchar("setup_type", { length: 50 }),
   timeframe: varchar("timeframe", { length: 10 }),
   notes: text("notes"),
   tags: jsonb("tags"),
+  executionStyle: executionStyleEnum("execution_style").notNull(),
+  status: tradeStatusEnum("status").notNull().default("PENDING"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  instrument: varchar("instrument", { length: 20 }).notNull(),
+  side: varchar("side", { length: 10 }).notNull(),
 });
 
 /**

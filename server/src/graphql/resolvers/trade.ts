@@ -3,6 +3,8 @@ import GraphqlContext from "@/types/types.utils";
 import { eq } from "drizzle-orm";
 import { GraphQLError } from "graphql";
 
+type TradeInsert = typeof trades.$inferInsert;
+
 export interface TradeTargetInput {
   label?: string;
   executedPrice?: number;
@@ -11,20 +13,15 @@ export interface TradeTargetInput {
   moveStopTo?: number | null;
 }
 
-export interface TradePlanInput {
+interface LogTradeInput {
   accountId: string;
-  symbol: string;
+  instrument: string;
   side: string;
   plannedEntryPrice: number;
-  initialStopLoss: number;
-  initialTakeProfit: number;
+  plannedStopLoss: number;
+  plannedTakeProfit: number;
   size: number;
-  setupType?: string | null;
-  timeframe?: string | null;
-  notes?: string | null;
-  tags?: string[];
-  targets?: TradeTargetInput[];
-  executionStyle?: string;
+  executionStyle: string;
 }
 
 // Minimal CreateTradeInput for createTrade mutation (not implemented)
@@ -44,6 +41,25 @@ export interface CreateTradeInput {
   notes?: string | null;
   tags?: string[];
   targets?: TradeTargetInput[];
+}
+
+// Utility function to deduce the actual execution style
+function deduceExecutionStyle(executionStyle: string, side: string): string {
+  switch (executionStyle) {
+    case "MARKET":
+      return "MARKET";
+    case "LIMIT":
+      switch (side) {
+        case "buy":
+          return "BUY_LIMIT";
+        case "sell":
+          return "SELL_LIMIT";
+        default:
+          throw new GraphQLError(`Invalid side: ${side}`);
+      }
+    default:
+      throw new GraphQLError(`Invalid executionStyle: ${executionStyle}`);
+  }
 }
 
 const tradeResolvers = {
@@ -77,54 +93,62 @@ const tradeResolvers = {
      *
      * @returns Object containing the created trade and its associated targets
      */
-    async createTradePlan(
+    async logTrade(
       _: unknown,
-      { input }: { input: TradePlanInput },
+      { input }: { input: LogTradeInput },
       context: GraphqlContext
     ) {
-      console.log("createTradePlan called with input:", input);
-      const { db, session } = context;
-      if (!session?.id) throw new GraphQLError("Not authenticated");
-
       try {
-        const [trade] = await db
-          .insert(trades)
-          .values({
-            userId: session.id,
-            accountId: input.accountId,
-            symbol: input.symbol,
-            side: input.side,
-            plannedEntryPrice: String(input.plannedEntryPrice),
-            initialStopLoss: String(input.initialStopLoss),
-            initialTakeProfit: String(input.initialTakeProfit),
-            size: String(input.size),
-            setupType: input.setupType,
-            timeframe: input.timeframe,
-            notes: input.notes,
-            tags: input.tags,
-            status: "planned", // Initial status for all trade plans
-            executionStyle: "market", // Validated enum value
-            remainingSize: String(input.size), // Initially, remaining size equals total size
-            currentStopLoss: String(input.initialStopLoss), // Initial stop loss becomes current
-          })
-          .returning();
-      } catch (error) {
-        console.error("Error inserting trade plan:", error);
-        // Preserve custom GraphQL errors for validation failures
-        if (error instanceof GraphQLError) {
-          throw error;
-        }
-        // Log unexpected errors for debugging while keeping user message generic
-        throw new GraphQLError(
-          "Failed to create trade plan. Please try again later."
-        );
-      }
-      // Validate core trade plan fields that are required for any trade
+        // 1. Check if user is authenticated
+        const { db, session } = context;
+        if (!session?.id) throw new GraphQLError("Not authenticated");
 
-      return {
-        success: true,
-        message: "Trade plan created successfully!",
-      };
+        // 2. Destructure input and deduce actual trade execution style
+        const {
+          accountId,
+          instrument,
+          side,
+          plannedEntryPrice,
+          plannedStopLoss,
+          plannedTakeProfit,
+          size,
+          executionStyle,
+        } = input;
+
+        const actualExecutionStyle = deduceExecutionStyle(executionStyle, side);
+
+        // 3. Insert the new trade into the database
+        // Only required fields are included; add more if needed
+        // Use the correct type for the insert object to avoid linter errors
+        const tradeInsert: TradeInsert = {
+          userId: session.id,
+          accountId,
+          instrument,
+          side,
+          plannedEntryPrice: String(plannedEntryPrice),
+          plannedStopLoss: String(plannedStopLoss),
+          plannedTakeProfit: String(plannedTakeProfit),
+          size: String(size),
+          executionStyle: actualExecutionStyle as TradeInsert["executionStyle"],
+          // If execution style is MARKET, set status to OPEN, else let DB default to PENDING
+          ...(actualExecutionStyle === "MARKET" ? { status: "OPEN" } : {}),
+        };
+        const [createdTrade] = await db
+          .insert(trades)
+          .values(tradeInsert)
+          .returning({ id: trades.id });
+
+        // 4. Return a success message and the created trade's id
+        return {
+          success: true,
+          message: "Trade logged successfully",
+          tradeId: createdTrade.id,
+        };
+      } catch (error) {
+        // Log the error for debugging
+        console.error("Error logging trade:", error);
+        throw new GraphQLError("Failed to log trade. Please try again later.");
+      }
     },
   },
 
