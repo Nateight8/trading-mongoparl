@@ -11,16 +11,19 @@ import MetricCard from "./metric-card";
 import { PlusIcon } from "lucide-react";
 import { Button } from "../ui/button";
 // import { Chart01 } from "./chart-01";
-import { Chart03 } from "./chart-03";
+import PortfolioChart from "./chart-03";
+import { PortfolioOverview } from "@/graphql/operations/account";
 
 // Only the props needed for Overview
 interface OverviewProps {
   currentCapital: number;
   roi: number;
-  overview: {
-    name: string;
-    chartData: { month: string; actual: number; projected: number }[];
-  };
+  // overview: {
+  //   name: string;
+  //   chartData: { month: string; actual: number; projected: number }[];
+  // };
+
+  overview: PortfolioOverview | undefined;
 }
 
 export default function Overview({
@@ -36,6 +39,8 @@ export default function Overview({
     month: "vs last month",
     year: "vs last year",
   };
+
+  console.log("overview from overview", overview);
 
   return (
     <>
@@ -80,7 +85,14 @@ export default function Overview({
           chartData: overview.chartData,
         }}
       /> */}
-      <Chart03 name={overview.name} currentBalance={currentCapital} roi={roi} />
+      <PortfolioChart
+        name="Portfolio Performance"
+        chartData={overview?.chartData}
+        // chartData={apiData.overview.chartData}
+        // currentBalance={apiData.overview.currentBalance}
+        // pnl={apiData.overview.pnl}
+        // roi={apiData.overview.roi}
+      />
     </>
   );
 }

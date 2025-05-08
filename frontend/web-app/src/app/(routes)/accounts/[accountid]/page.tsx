@@ -21,8 +21,10 @@ interface PageProps {
 export default function Page({ params }: PageProps) {
   const { accountid } = params;
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedTrade, setSelectedTrade] = useState(null);
 
-  const handleOpen = () => {
+  const handleOpen = (trade) => {
+    setSelectedTrade(trade);
     setIsOpen(true);
   };
 
@@ -47,7 +49,11 @@ export default function Page({ params }: PageProps) {
       </div>
       <div className="min-h-[100vh] flex-1 md:min-h-min">
         <AccountTable handleOpen={handleOpen} data={data?.loggedTrades} />
-        <UpdateLogStatus isOpen={isOpen} setIsOpen={setIsOpen} />
+        <UpdateLogStatus
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          trade={selectedTrade}
+        />
       </div>
     </>
   );

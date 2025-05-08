@@ -1,7 +1,6 @@
 "use client";
 
-import { useId } from "react";
-import { CheckIcon } from "lucide-react";
+import { CircleAlertIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,106 +13,143 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
-export default function Executed({ onClose }: { onClose: () => void }) {
-  const id = useId();
+import tradeOperations, { TradeProps } from "@/graphql/operations/trade";
+
+import { z } from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useMutation } from "@apollo/client";
+export const executeTradeSchema = z.object({
+  //   id: z.string().min(1, "Trade ID is required"),
+  //   status: z.literal("OPEN"), // Always set to OPEN for execution
+  executedEntryPrice: z.number().positive("Entry price must be positive"),
+  executedStopLoss: z.number().positive("Stop loss must be positive"),
+  executionNotes: z.string().max(1000).optional(),
+});
+
+export default function Executed({
+  onClose,
+  trade,
+}: {
+  onClose: () => void;
+  trade: TradeProps;
+}) {
+  const form = useForm<z.infer<typeof executeTradeSchema>>({
+    resolver: zodResolver(executeTradeSchema),
+    defaultValues: {
+      //   id: trade.id,
+      //   status: "OPEN",
+      executedEntryPrice: trade.plannedEntryPrice,
+      executedStopLoss: trade.plannedStopLoss,
+      executionNotes: "",
+    },
+  });
+
+  const [executeTrade] = useMutation(tradeOperations.Mutations.executeTrade);
+
+  function onSubmit(data: z.infer<typeof executeTradeSchema>) {
+    console.log("executed", data);
+    executeTrade({
+      variables: {
+        input: {
+          id: trade.id,
+          ...data,
+        },
+      },
+    });
+  }
 
   return (
-    <Dialog
-      onOpenChange={(open) => {
-        if (!open) onClose();
-      }}
-    >
+    <Dialog>
       <DialogTrigger asChild>
         <Button>Confirm Execution</Button>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-lg [&>button:last-child]:top-3.5">
-        <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b px-6 py-4 text-base">
-            Update trade log
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="sr-only">
-          Make changes to your profile here. You can change your photo and set a
-          username.
-        </DialogDescription>
-        <div className="overflow-y-auto">
-          <div className="px-6 pt-4 pb-6">
-            <form className="space-y-4">
-              <div className="flex flex-col gap-4 sm:flex-row">
-                <div className="flex-1 space-y-2">
-                  <Label htmlFor={`${id}-first-name`}>First name</Label>
-                  <Input
-                    id={`${id}-first-name`}
-                    placeholder="Matt"
-                    defaultValue="Margaret"
-                    type="text"
-                    required
-                  />
-                </div>
-                <div className="flex-1 space-y-2">
-                  <Label htmlFor={`${id}-last-name`}>Last name</Label>
-                  <Input
-                    id={`${id}-last-name`}
-                    placeholder="Welsh"
-                    defaultValue="Villard"
-                    type="text"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="*:not-first:mt-2">
-                <Label htmlFor={`${id}-username`}>Username</Label>
-                <div className="relative">
-                  <Input
-                    id={`${id}-username`}
-                    className="peer pe-9"
-                    placeholder="Username"
-                    defaultValue="margaret-villard-69"
-                    type="text"
-                    required
-                  />
-                  <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 end-0 flex items-center justify-center pe-3 peer-disabled:opacity-50">
-                    <CheckIcon
-                      size={16}
-                      className="text-emerald-500"
-                      aria-hidden="true"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="*:not-first:mt-2">
-                <Label htmlFor={`${id}-website`}>Website</Label>
-                <div className="flex rounded-md shadow-xs">
-                  <span className="border-input bg-background text-muted-foreground -z-10 inline-flex items-center rounded-s-md border px-3 text-sm">
-                    https://
-                  </span>
-                  <Input
-                    id={`${id}-website`}
-                    className="-ms-px rounded-s-none shadow-none"
-                    placeholder="yourwebsite.com"
-                    defaultValue="www.margaret.com"
-                    type="text"
-                  />
-                </div>
-              </div>
-            </form>
+      <DialogContent>
+        <div className="flex flex-col items-center gap-2">
+          <div
+            className="flex size-9 shrink-0 items-center justify-center rounded-full border"
+            aria-hidden="true"
+          >
+            <CircleAlertIcon className="opacity-80" size={16} />
           </div>
+          <DialogHeader>
+            <DialogTitle className="sm:text-center">
+              Confirm Execution
+            </DialogTitle>
+            <DialogDescription className="sm:text-center">
+              Change the entry price, stop loss if you entered at a different
+              price than the original entry price or stop loss. Add any
+              additional notes about the execution(optional).
+            </DialogDescription>
+          </DialogHeader>
         </div>
-        <DialogFooter className="border-t px-6 py-4">
-          <DialogClose asChild>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-          </DialogClose>
-          <DialogClose asChild>
-            <Button type="button" onClick={onClose}>
-              Save changes
-            </Button>
-          </DialogClose>
-        </DialogFooter>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+            <div className="grid grid-cols-2 gap-5">
+              <FormField
+                control={form.control}
+                name="executedEntryPrice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Entry Price</FormLabel>
+                    <FormControl>
+                      <Input placeholder="eg. 1.2345" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="executedStopLoss"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Stop Loss</FormLabel>
+                    <FormControl>
+                      <Input placeholder="eg. 1.2345" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <FormField
+              control={form.control}
+              name="executionNotes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Execution Notes</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="your execution notes" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancel
+                </Button>
+              </DialogClose>
+              <DialogClose asChild>
+                <Button type="submit">Confirm Execution</Button>
+              </DialogClose>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

@@ -68,6 +68,7 @@ import {
   RiMoreLine,
 } from "@remixicon/react";
 import { useId, useMemo, useRef, useState, useTransition } from "react";
+import { PulsatingDot } from "@/components/ui/pulsating-dot";
 
 // Trade log type for the table
 export type TradeLogItem = {
@@ -77,6 +78,7 @@ export type TradeLogItem = {
   plannedTakeProfit: number;
   size: number;
   executionStyle: string;
+  status: string;
 };
 
 interface GetColumnsProps {
@@ -181,6 +183,22 @@ const getColumns = ({
     size: 140,
   },
   {
+    header: "Status",
+    accessorKey: "status",
+    cell: ({ row }) => {
+      const statusRaw = row.getValue("status");
+      const status =
+        typeof statusRaw === "string" ? statusRaw.trim().toUpperCase() : "";
+      let variant: "active" | "mutated" | "closed" = "active";
+      if (status === "CLOSED") variant = "closed";
+      else if (status === "PENDING") variant = "mutated";
+      else if (status === "OPEN") variant = "active";
+      else variant = "active"; // fallback
+      return <PulsatingDot variant={variant} />;
+    },
+    size: 40,
+  },
+  {
     id: "actions",
     header: () => <span className="sr-only">Actions</span>,
     cell: ({ row }) => (
@@ -194,7 +212,7 @@ const getColumns = ({
 export interface AccountTableProps {
   data: TradeLogItem[];
   setData?: React.Dispatch<React.SetStateAction<TradeLogItem[]>>;
-  handleOpen: () => void;
+  handleOpen: (trade: TradeLogItem) => void;
 }
 
 export default function AccountTable({
@@ -511,7 +529,7 @@ export default function AccountTable({
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
                 className="border-0 [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg h-px hover:bg-accent/50 cursor-pointer"
-                onClick={() => handleOpen()}
+                onClick={() => handleOpen(row.original)}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id} className="last:py-0 h-[inherit]">
@@ -687,6 +705,7 @@ export const mockTradeLogData: TradeLogItem[] = [
     plannedTakeProfit: 1.12,
     size: 15000,
     executionStyle: "Market",
+    status: "open",
   },
   {
     instrument: "GBPJPY",
@@ -695,6 +714,7 @@ export const mockTradeLogData: TradeLogItem[] = [
     plannedTakeProfit: 156.5,
     size: 12000,
     executionStyle: "Limit",
+    status: "closed",
   },
   {
     instrument: "USDJPY",
@@ -703,6 +723,7 @@ export const mockTradeLogData: TradeLogItem[] = [
     plannedTakeProfit: 111.0,
     size: 20000,
     executionStyle: "Stop",
+    status: "pending",
   },
   {
     instrument: "AUDUSD",
@@ -711,6 +732,7 @@ export const mockTradeLogData: TradeLogItem[] = [
     plannedTakeProfit: 0.77,
     size: 10000,
     executionStyle: "Market",
+    status: "open",
   },
   {
     instrument: "EURJPY",
@@ -719,6 +741,7 @@ export const mockTradeLogData: TradeLogItem[] = [
     plannedTakeProfit: 131.5,
     size: 8000,
     executionStyle: "Limit",
+    status: "closed",
   },
   {
     instrument: "GBPUSD",
@@ -727,6 +750,7 @@ export const mockTradeLogData: TradeLogItem[] = [
     plannedTakeProfit: 1.4,
     size: 25000,
     executionStyle: "Stop",
+    status: "pending",
   },
   {
     instrument: "NZDUSD",
@@ -735,6 +759,7 @@ export const mockTradeLogData: TradeLogItem[] = [
     plannedTakeProfit: 0.71,
     size: 5000,
     executionStyle: "Market",
+    status: "open",
   },
   {
     instrument: "USDCAD",
@@ -743,5 +768,6 @@ export const mockTradeLogData: TradeLogItem[] = [
     plannedTakeProfit: 1.26,
     size: 6000,
     executionStyle: "Limit",
+    status: "closed",
   },
 ];

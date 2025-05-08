@@ -10,6 +10,12 @@ const accountOperations = {
             pnl
             roi
             winrate
+
+            chartData {
+              projected
+              x
+              actual
+            }
           }
           accounts {
             accountCurrency
@@ -69,6 +75,11 @@ export interface PortfolioOverview {
   pnl: number;
   roi: number;
   winrate: number;
+  chartData: {
+    x: string;
+    actual: number;
+    projected: number;
+  }[];
 }
 
 export interface TradingAccount {

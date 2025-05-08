@@ -19,6 +19,8 @@ export default function Accounts() {
     }
   );
 
+  console.log("DATA FROM RESOLVER", data?.userTradeData.overview.chartData);
+
   if (loading) return <div>Loading...</div>;
 
   const overview = data?.userTradeData.overview;
@@ -29,16 +31,18 @@ export default function Accounts() {
       <Overview
         currentCapital={overview?.currentBalance ?? 0}
         roi={overview?.roi ?? 0}
-        overview={
-          overview
-            ? { ...overview, name: "Portfolio Overview", chartData: [] }
-            : { name: "Portfolio Overview", chartData: [] }
-        }
+        overview={overview!}
+        // overview={
+        //   overview
+        //     ? { ...overview, name: "Portfolio Overview", chartData: [] }
+        //     : { name: "Portfolio Overview", chartData: [] }
+        // }
       />
       <Assets accounts={accounts} />
     </div>
   );
 }
+
 // const traderData = {
 //   currentCapital: 45386,
 //   roi: 22.8,

@@ -36,9 +36,32 @@ const tradeOperations = {
         }
       }
     `,
+
+    executeTrade: gql`
+      mutation ExecuteTrade($input: ExecuteTradeInput!) {
+        executeTrade(input: $input) {
+          success
+          message
+        }
+      }
+    `,
   },
 
   Subscriptions: {},
 };
+
+// TODO: Update this interface to match the backend schema as it evolves.
+export interface TradeProps {
+  // Example fields, update as needed
+  id?: string;
+  instrument?: string;
+  plannedEntryPrice?: number;
+  plannedStopLoss?: number;
+  plannedTakeProfit?: number;
+  size?: number;
+  executionStyle?: string;
+  status?: "OPEN" | "CLOSED" | "PENDING";
+  // Add more fields as required
+}
 
 export default tradeOperations;

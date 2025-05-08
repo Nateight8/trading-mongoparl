@@ -12,14 +12,19 @@ import {
 import { Button } from "@/components/ui/button";
 import UpdateLog from "./update-log";
 import Executed from "./executed";
+import { TradeProps } from "@/graphql/operations/trade";
 
 export default function UpdateLogStatus({
   isOpen,
   setIsOpen,
+  trade,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  trade: TradeProps;
 }) {
+  //   console.log(trade?.status);
+
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
@@ -44,8 +49,10 @@ export default function UpdateLogStatus({
           </AlertDialogHeader>
         </div>
         <AlertDialogFooter>
-          <UpdateLog onClose={() => setIsOpen(false)} />
-          <Executed onClose={() => setIsOpen(false)} />
+          <UpdateLog onClose={() => setIsOpen(false)} trade={trade} />
+          {trade?.status === "PENDING" ? (
+            <Executed onClose={() => setIsOpen(false)} trade={trade} />
+          ) : null}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
