@@ -1,6 +1,6 @@
 import { trades, tradeTargets, TradeTargetInsert } from "@/db/schema/trade-log";
 import GraphqlContext from "@/types/types.utils";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { GraphQLError } from "graphql";
 
 type TradeInsert = typeof trades.$inferInsert;
@@ -150,10 +150,62 @@ const tradeResolvers = {
         throw new GraphQLError("Failed to log trade. Please try again later.");
       }
     },
+
+    async executeTrade(
+      _: unknown,
+      {
+        input,
+      }: {
+        input: {
+          id: string;
+          executedEntryPrice: number;
+          executedStopLoss: number;
+          executionNotes?: string;
+        };
+      },
+      context: GraphqlContext
+    ) {
+      try {
+        const { db, session } = context;
+        if (!session?.id) throw new GraphQLError("Not authenticated");
+
+        // Find the trade and ensure it belongs to the user
+        const [trade] = await db
+          .select()
+          .from(trades)
+          .where(and(eq(trades.id, input.id), eq(trades.userId, session.id)));
+
+        if (!trade) throw new GraphQLError("Trade not found");
+
+        // Update the trade with execution details and set status to OPEN
+        const [updatedTrade] = await db
+          .update(trades)
+          .set({
+            executedEntryPrice: String(input.executedEntryPrice),
+            executedStopLoss: String(input.executedStopLoss),
+            executionNotes: input.executionNotes,
+            status: "OPEN",
+            updatedAt: new Date(),
+          })
+          .where(eq(trades.id, input.id))
+          .returning();
+
+        return {
+          success: true,
+          message: "Trade executed and updated successfully",
+          trade: updatedTrade,
+        };
+      } catch (error) {
+        console.error("Error executing trade:", error);
+        throw new GraphQLError(
+          "Failed to execute trade. Please try again later."
+        );
+      }
+    },
   },
 
   Query: {
-    userTrades: async (
+    loggedTrades: async (
       _: unknown,
       { accountId }: { accountId: string },
       context: GraphqlContext

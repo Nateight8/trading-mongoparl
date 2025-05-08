@@ -29,6 +29,40 @@ The trade log system records every trade made by users, enabling:
   ],
   "executionStyle": "BUY_LIMIT"
 } -->
+<!-- {
+  "accountId": "abc123",
+  "plannedEntryPrice": 1.2345, not nullible
+  "plannedStopLoss": 1.2000, not nullible
+  "plannedTakeProfit": 1.3000, not nullible
+  "size": 1000, not nullible
+  "setupType": "Breakout",
+  "timeframe": "H1",
+  "notes": "My plan for this trade",
+  "tags": ["trend", "breakout"],
+  "targets": [
+    {
+      "label": "TP1",
+      "executedPrice": 1.2500,
+      "riskReward": 2,
+      "exitSize": 500,
+      "moveStopTo": 1.2200
+    }
+  ],
+  "executionStyle": "BUY_LIMIT"
+} -->
+
+<!-- {
+  "accountId": "abc123",
+  "plannedEntryPrice": 1.2345, not nullible
+  "plannedStopLoss": 1.2000, not nullible
+  "plannedTakeProfit": 1.3000, not nullible
+  "size": 1000, not nullible
+  "setupType": "Breakout",
+  "timeframe": "H1",
+  "notes": "My plan for this trade",
+  "tags": ["trend", "breakout"],
+  "executionStyle": "BUY_LIMIT"
+} -->
 
 ## Database Table Design
 

@@ -74,29 +74,37 @@ export const tradeTypeDefs = gql`
     """
     plannedEntryPrice: Float!
     """
+    Planned stop loss price for the trade
+    """
+    plannedStopLoss: Float!
+    """
+    Planned take profit price for the trade
+    """
+    plannedTakeProfit: Float!
+
+    """
+    Actual price at which the trade was entered
+    """
+    executedEntryPrice: Float
+
+    """
+    Actual stop loss set at execution
+    """
+    executedStopLoss: Float
+
+    """
+    Notes about the execution (slippage, partial fill, etc.)
+    """
+    executionNotes: String
+
+    """
     Initial position size
     """
     size: Float!
     """
-    Initial stop loss price
-    """
-    initialStopLoss: Float!
-    """
-    Initial take profit price
-    """
-    initialTakeProfit: Float!
-    """
     Current trade status
     """
     status: TradeStatus!
-    """
-    Remaining position size after partial exits
-    """
-    remainingSize: Float!
-    """
-    Current stop loss price (may be different from initial)
-    """
-    currentStopLoss: Float!
     """
     Type of trading setup used
     """
@@ -294,7 +302,7 @@ export const tradeTypeDefs = gql`
 
   type Query {
     trade(id: ID!): Trade
-    userTrades(accountId: ID!): [Trade!]!
+    loggedTrades(accountId: ID!): [Trade!]!
     getTradesByAccount(accountId: ID!): [Trade!]!
     tradeScenarios(tradeId: ID!): [TradeScenario!]!
     accountAnalytics(accountId: ID!, timeframe: String!): AccountAnalytics!
@@ -344,6 +352,8 @@ export const tradeTypeDefs = gql`
     updateTradeStopLoss(tradeId: ID!, newStopLoss: Float!): Trade!
 
     logTrade(input: LogTradeInput!): LogTradeResponse!
+
+    executeTrade(input: ExecuteTradeInput!): ExecuteTradeResponse!
 
     executeTradePlan(
       tradePlanId: ID!
@@ -408,5 +418,18 @@ export const tradeTypeDefs = gql`
     executedTakeProfit: Float
     triggeredStopLoss: Float
     executionStyle: ExecutionStyle!
+  }
+
+  input ExecuteTradeInput {
+    id: ID!
+    executedEntryPrice: Float!
+    executedStopLoss: Float!
+    executionNotes: String
+  }
+
+  type ExecuteTradeResponse {
+    success: Boolean!
+    message: String
+    trade: Trade
   }
 `;

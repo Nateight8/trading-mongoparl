@@ -73,6 +73,16 @@ export const trades = pgTable("trades", {
     scale: 8,
   }).notNull(),
 
+  // --- Execution fields ---
+  executedEntryPrice: decimal("executed_entry_price", {
+    precision: 20,
+    scale: 8,
+  }),
+
+  executedStopLoss: decimal("executed_stop_loss", { precision: 20, scale: 8 }),
+
+  executionNotes: text("execution_notes"),
+
   size: decimal("size", { precision: 20, scale: 8 }).notNull(),
   setupType: varchar("setup_type", { length: 50 }),
   timeframe: varchar("timeframe", { length: 10 }),
