@@ -140,9 +140,9 @@ export const userTypeDefs = gql`
   """
   type ChartPoint {
     """
-    Month of the data point
+    X-axis value of the data point (timestamp, date, etc.)
     """
-    month: String!
+    x: String!
     """
     Actual performance value
     """

@@ -717,3 +717,26 @@ As a trader who reviews my performance, I want to see analytics comparing my pla
 ## System Overview
 
 // ... existing code ...
+
+<!-- const traderData: {
+    currentCapital: number;
+    roi: number;
+    overview: {
+        currentBalance: number;
+        roi: number;
+        name: string;
+        chartData: {
+            id: string;
+            month: string;
+            actual: number;
+            projected: number;
+        }[];
+    };
+    accounts: {
+        id: string;
+        ... 5 more ...;
+        chartData: {
+            ...;
+        }[];
+    }[];
+} -->

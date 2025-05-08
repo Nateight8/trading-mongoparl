@@ -93,6 +93,16 @@ export const tradeTypeDefs = gql`
     executedStopLoss: Float
 
     """
+    Price at which the user confirmed closing the trade
+    """
+    exitPrice: Float
+
+    """
+    Whether the trade is closed
+    """
+    closed: Boolean
+
+    """
     Notes about the execution (slippage, partial fill, etc.)
     """
     executionNotes: String

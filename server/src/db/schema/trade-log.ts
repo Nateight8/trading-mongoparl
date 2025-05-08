@@ -83,6 +83,12 @@ export const trades = pgTable("trades", {
 
   executionNotes: text("execution_notes"),
 
+  // Add exitPrice for user-confirmed closing price
+  exitPrice: decimal("exit_price", { precision: 20, scale: 8 }),
+
+  // Boolean to track if the trade is closed
+  closed: text("closed").default("false"),
+
   size: decimal("size", { precision: 20, scale: 8 }).notNull(),
   setupType: varchar("setup_type", { length: 50 }),
   timeframe: varchar("timeframe", { length: 10 }),
