@@ -19,23 +19,33 @@ import { Button } from "@/components/ui/button";
 export const executeTradeSchema = z.object({
   //   id: z.string().min(1, "Trade ID is required"),
   //   status: z.literal("OPEN"), // Always set to OPEN for execution
-  closed: z.number().positive("Entry price must be positive"),
+  exitPrice: z
+  .string()
+  .transform((val) => parseFloat(val))
+  .refine((val) => !isNaN(val) && val > 0, {
+    message: "Stop loss must be a positive number",
+  }),
 });
 
 export default function CloseTrade({ trade }: { trade: TradeProps }) {
   const form = useForm<z.infer<typeof executeTradeSchema>>({
     resolver: zodResolver(executeTradeSchema),
     defaultValues: {
-      closed: undefined,
+      exitPrice: undefined,
     },
   });
 
-  const [executeTrade] = useMutation(tradeOperations.Mutations.executeTrade);
+  const [closeTrade] = useMutation(tradeOperations.Mutations.closeTrade);
 
   function onSubmit(data: z.infer<typeof executeTradeSchema>) {
     console.log("executed", data);
-    executeTrade({
-      variables: {},
+    closeTrade({
+      variables: {
+        input: {
+          tradeId: trade.id,
+          exitPrice: data.exitPrice
+        }
+      },
     });
   }
 
@@ -48,7 +58,7 @@ export default function CloseTrade({ trade }: { trade: TradeProps }) {
         >
           <FormField
             control={form.control}
-            name="closed"
+            name="exitPrice"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -64,7 +74,7 @@ export default function CloseTrade({ trade }: { trade: TradeProps }) {
       </Form>
       <button
         onClick={() => {
-          form.setValue("closed", trade.plannedEntryPrice!);
+          form.setValue("exitPrice", trade.plannedEntryPrice!);
         }}
         className="text-xs hover:text-primary focus:outline-none p-2 cursor-pointer shadow-sm"
         type="button"

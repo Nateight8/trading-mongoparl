@@ -363,9 +363,9 @@ export const tradeTypeDefs = gql`
     message: String
     trade: Trade
   }
-  type ClosedTradeInput {
+  input ClosedTradeInput {
     tradeId: ID!
-    closed: Float!
+    exitPrice: Float!
   }
 
   type Mutation {

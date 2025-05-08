@@ -45,6 +45,20 @@ const tradeOperations = {
         }
       }
     `,
+    
+    closeTrade: gql`
+
+      mutation CloseTrade($input: ClosedTradeInput) {
+  closeTrade(input: $input) {
+    message
+    success
+  }
+}
+
+    `,
+
+   
+
   },
 
   Subscriptions: {},

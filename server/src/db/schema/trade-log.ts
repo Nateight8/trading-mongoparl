@@ -8,6 +8,7 @@ import {
   jsonb,
   primaryKey,
   pgEnum,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { users } from "./auth";
 import { tradingAccounts } from "./account";
@@ -87,7 +88,7 @@ export const trades = pgTable("trades", {
   exitPrice: decimal("exit_price", { precision: 20, scale: 8 }),
 
   // Boolean to track if the trade is closed
-  closed: text("closed").default("false"),
+  closed: boolean("closed").default(false),
 
   size: decimal("size", { precision: 20, scale: 8 }).notNull(),
   setupType: varchar("setup_type", { length: 50 }),

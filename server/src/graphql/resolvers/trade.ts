@@ -289,6 +289,52 @@ const tradeResolvers = {
         );
       }
     },
+
+    async closeTrade(
+      _: unknown,
+      { input }: { input: { tradeId: string; exitPrice: number } },
+      context: GraphqlContext
+    ) {
+      try {
+        const { db, session } = context;
+        if (!session?.id) {
+          throw new GraphQLError("Not authenticated");
+        }
+
+        // Find the trade and ensure it belongs to the user
+        const [trade] = await db
+          .select()
+          .from(trades)
+          .where(and(eq(trades.id, input.tradeId), eq(trades.userId, session.id)));
+
+        if (!trade) {
+          throw new GraphQLError("Trade not found");
+        }
+
+        // Update the trade with closed status and exit price
+        const [updatedTrade] = await db
+          .update(trades)
+          .set({
+            closed: true,
+            status: "CLOSED",
+            exitPrice: String(input.exitPrice),
+            updatedAt: new Date(),
+          })
+          .where(eq(trades.id, input.tradeId))
+          .returning();
+
+        return {
+          success: true,
+          message: "Trade closed successfully",
+          trade: updatedTrade,
+        };
+      } catch (error) {
+        console.error("Error closing trade:", error);
+        throw new GraphQLError(
+          "Failed to close trade. Please try again later."
+        );
+      }
+    },
   },
 
   Query: {
