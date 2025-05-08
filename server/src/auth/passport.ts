@@ -11,6 +11,13 @@ import { eq } from "drizzle-orm";
 import { Snowflake } from "@theinternetfolks/snowflake";
 
 export function setupPassport() {
+  // Debug log to check environment variables
+  console.log('Google OAuth Config:', {
+    clientID: process.env.AUTH_GOOGLE_ID ? 'Set' : 'Not Set',
+    clientSecret: process.env.AUTH_GOOGLE_SECRET ? 'Set' : 'Not Set',
+    callbackURL: process.env.GOOGLE_CALLBACK_URL
+  });
+
   passport.use(
     new GoogleStrategy(
       {

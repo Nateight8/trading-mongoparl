@@ -98,12 +98,42 @@ const tradeResolvers = {
       { input }: { input: LogTradeInput },
       context: GraphqlContext
     ) {
+      console.log("🔍 [logTrade] RESOLVER CALLED", {
+        input,
+        context: {
+          session: context.session ? {
+            id: context.session.id,
+            email: context.session.email
+          } : null,
+          hasDb: !!context.db
+        }
+      });
+      
       try {
         // 1. Check if user is authenticated
         const { db, session } = context;
-        if (!session?.id) throw new GraphQLError("Not authenticated");
+        if (!session?.id) {
+          console.error("[logTrade] Authentication failed - no session ID");
+          return {
+            success: false,
+            message: "Authentication required",
+            errorCode: "AUTH_REQUIRED",
+            errorDetails: "User session not found"
+          };
+        }
 
-        // 2. Destructure input and deduce actual trade execution style
+        // 2. Validate input
+        if (!input.accountId || !input.instrument || !input.side || !input.plannedEntryPrice || !input.plannedStopLoss || !input.plannedTakeProfit || !input.size) {
+          console.error("[logTrade] Invalid input", { input });
+          return {
+            success: false,
+            message: "Invalid trade input",
+            errorCode: "INVALID_INPUT",
+            errorDetails: "Missing required trade fields"
+          };
+        }
+
+        // 3. Destructure input and deduce actual trade execution style
         const {
           accountId,
           instrument,
@@ -115,11 +145,22 @@ const tradeResolvers = {
           executionStyle,
         } = input;
 
-        const actualExecutionStyle = deduceExecutionStyle(executionStyle, side);
+        console.log("[logTrade] Processing trade with execution style", { executionStyle, side });
 
-        // 3. Insert the new trade into the database
-        // Only required fields are included; add more if needed
-        // Use the correct type for the insert object to avoid linter errors
+        let actualExecutionStyle;
+        try {
+          actualExecutionStyle = deduceExecutionStyle(executionStyle, side);
+        } catch (error) {
+          console.error("[logTrade] Invalid execution style", { error, executionStyle, side });
+          return {
+            success: false,
+            message: "Invalid execution style",
+            errorCode: "INVALID_EXECUTION_STYLE",
+            errorDetails: error instanceof Error ? error.message : "Unknown error"
+          };
+        }
+
+        // 4. Insert the new trade into the database
         const tradeInsert: TradeInsert = {
           userId: session.id,
           accountId,
@@ -133,21 +174,67 @@ const tradeResolvers = {
           // If execution style is MARKET, set status to OPEN, else let DB default to PENDING
           ...(actualExecutionStyle === "MARKET" ? { status: "OPEN" } : {}),
         };
-        const [createdTrade] = await db
-          .insert(trades)
-          .values(tradeInsert)
-          .returning({ id: trades.id });
 
-        // 4. Return a success message and the created trade's id
-        return {
-          success: true,
-          message: "Trade logged successfully",
-          tradeId: createdTrade.id,
-        };
+        console.log("[logTrade] Attempting to insert trade", { tradeInsert });
+
+        try {
+          console.log("[logTrade] Database operation starting", { 
+            userId: session.id,
+            accountId,
+            instrument,
+            side,
+            executionStyle: actualExecutionStyle
+          });
+
+          const [createdTrade] = await db
+            .insert(trades)
+            .values(tradeInsert)
+            .returning({ id: trades.id });
+
+          console.log("[logTrade] Database operation completed", { 
+            createdTrade,
+            success: !!createdTrade
+          });
+
+          if (!createdTrade) {
+            console.error("[logTrade] Trade creation failed - no trade returned");
+            return {
+              success: false,
+              message: "Failed to create trade",
+              errorCode: "DB_INSERT_FAILED",
+              errorDetails: "Database returned no trade ID"
+            };
+          }
+
+          console.log("[logTrade] Trade created successfully", { tradeId: createdTrade.id });
+          return {
+            success: true,
+            message: "Trade logged successfully",
+            tradeId: createdTrade.id
+          };
+        } catch (dbError) {
+          console.error("[logTrade] Database error", { 
+            error: dbError,
+            errorMessage: dbError instanceof Error ? dbError.message : "Unknown error",
+            errorStack: dbError instanceof Error ? dbError.stack : undefined,
+            tradeInsert 
+          });
+          return {
+            success: false,
+            message: "Failed to create trade in database",
+            errorCode: "DB_ERROR",
+            errorDetails: dbError instanceof Error ? dbError.message : "Unknown database error"
+          };
+        }
       } catch (error) {
         // Log the error for debugging
-        console.error("Error logging trade:", error);
-        throw new GraphQLError("Failed to log trade. Please try again later.");
+        console.error("[logTrade] Unexpected error", { error });
+        return {
+          success: false,
+          message: "Failed to log trade",
+          errorCode: "UNEXPECTED_ERROR",
+          errorDetails: error instanceof Error ? error.message : "Unknown error"
+        };
       }
     },
 

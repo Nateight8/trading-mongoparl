@@ -88,10 +88,9 @@ export default function Overview({
       <PortfolioChart
         name="Portfolio Performance"
         chartData={overview?.chartData}
-        // chartData={apiData.overview.chartData}
-        // currentBalance={apiData.overview.currentBalance}
-        // pnl={apiData.overview.pnl}
-        // roi={apiData.overview.roi}
+        currentBalance={overview?.currentBalance ?? 0}
+        roi={overview?.roi ?? 0}
+        pnl={overview?.pnl ?? 0}
       />
     </>
   );

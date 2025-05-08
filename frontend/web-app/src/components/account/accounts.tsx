@@ -20,6 +20,7 @@ export default function Accounts() {
   );
 
   console.log("DATA FROM RESOLVER", data?.userTradeData.overview.chartData);
+  console.log("FULL OVERVIEW DATA:", data?.userTradeData.overview);
 
   if (loading) return <div>Loading...</div>;
 
@@ -31,12 +32,7 @@ export default function Accounts() {
       <Overview
         currentCapital={overview?.currentBalance ?? 0}
         roi={overview?.roi ?? 0}
-        overview={overview!}
-        // overview={
-        //   overview
-        //     ? { ...overview, name: "Portfolio Overview", chartData: [] }
-        //     : { name: "Portfolio Overview", chartData: [] }
-        // }
+        overview={overview!}      
       />
       <Assets accounts={accounts} />
     </div>

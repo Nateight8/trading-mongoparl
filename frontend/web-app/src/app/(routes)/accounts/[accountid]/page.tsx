@@ -2,29 +2,30 @@
 // import LogTrade from "./_components/log-dialog";
 import AccountTable from "./_components/account-table";
 import { useQuery } from "@apollo/client";
-import tradeOperations from "@/graphql/operations/trade";
+import tradeOperations, { TradeProps } from "@/graphql/operations/trade";
 import { mockTradeLogData } from "./_components/account-table";
 import UpdateLog from "./_components/update-log";
 import { Card, CardContent } from "@/components/ui/card";
 import { LogForm } from "./_components/log-form";
 import UpdateLogStatus from "./_components/update-log-status";
-import { useState } from "react";
+import { useState, use } from "react";
 import { Button } from "@/components/ui/button";
-// import tradeOperations from "@/graphql/operations/trade";
+import type { TradeLogItem } from "./_components/account-table";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     accountid: string;
-  };
+  }>;
 }
 
 export default function Page({ params }: PageProps) {
-  const { accountid } = params;
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedTrade, setSelectedTrade] = useState(null);
+  const { accountid } = use(params);
 
-  const handleOpen = (trade) => {
-    setSelectedTrade(trade);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedTrade, setSelectedTrade] = useState<TradeProps | undefined>(undefined);
+
+  const handleOpen = (trade: TradeLogItem) => {
+    setSelectedTrade(trade as TradeProps);
     setIsOpen(true);
   };
 
@@ -33,8 +34,6 @@ export default function Page({ params }: PageProps) {
   });
 
   if (loading) return <div>Loading...</div>;
-
-  console.log("data", data);
 
   return (
     <>
@@ -48,12 +47,18 @@ export default function Page({ params }: PageProps) {
         </div>
       </div>
       <div className="min-h-[100vh] flex-1 md:min-h-min">
-        <AccountTable handleOpen={handleOpen} data={data?.loggedTrades} />
-        <UpdateLogStatus
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-          trade={selectedTrade}
+        <AccountTable 
+          handleOpen={handleOpen} 
+          data={data?.loggedTrades ?? []} 
         />
+
+        {selectedTrade && (
+          <UpdateLogStatus
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+            trade={selectedTrade}
+          />
+        )}
       </div>
     </>
   );

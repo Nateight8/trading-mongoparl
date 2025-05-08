@@ -352,7 +352,10 @@ export const tradeTypeDefs = gql`
 
   type LogTradeResponse {
     success: Boolean!
-    message: String
+    message: String!
+    errorCode: String
+    errorDetails: String
+    tradeId: ID
   }
 
   type Mutation {
