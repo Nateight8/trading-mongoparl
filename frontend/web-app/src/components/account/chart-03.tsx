@@ -16,8 +16,21 @@ import {
 } from "@/components/ui/chart";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
+interface ChartPoint {
+  x: string;
+  actual: number;
+  projected: number;
+}
+
+interface ProcessedChartPoint {
+  date: string;
+  time: string;
+  actual: number;
+  projected: number;
+}
+
 // Sample data to use if API data is not available
-const sampleData = [
+const sampleData: ChartPoint[] = [
   { x: "2025-05-07T11:15:16.103Z", actual: 10000, projected: 10000 },
   { x: "2025-05-07T11:34:16.755Z", actual: 10200, projected: 10100 },
   { x: "2025-05-07T19:59:19.055Z", actual: 6373, projected: 6367 },
@@ -26,7 +39,7 @@ const sampleData = [
 ];
 
 // Function to format date based on the selected time period
-const formatDate = (dateStr, period) => {
+const formatDate = (dateStr: string, period: string): string => {
   const date = new Date(dateStr);
   if (period === "1h") {
     return date.toLocaleTimeString("en-US", {
@@ -72,7 +85,12 @@ const chartConfig = {
 
 const TIME_PERIOD_OPTIONS = ["1h", "1d", "1w", "1m", "1y"];
 
-const ViewOption = ({ id, value }) => {
+interface ViewOptionProps {
+  id: string;
+  value: string;
+}
+
+const ViewOption = ({ id, value }: ViewOptionProps) => {
   return (
     <label className="relative z-10 inline-flex h-full min-w-8 cursor-pointer items-center justify-center px-2 whitespace-nowrap transition-colors select-none uppercase text-foreground has-data-[state=unchecked]:text-muted-foreground">
       {value}
@@ -81,8 +99,16 @@ const ViewOption = ({ id, value }) => {
   );
 };
 
+interface CustomCursorProps {
+  fill: string;
+  pointerEvents?: string;
+  height?: number;
+  points?: Array<{ x: number; y: number }>;
+  className?: string;
+}
+
 // Custom cursor component for tooltip
-function CustomCursor(props) {
+function CustomCursor(props: CustomCursorProps) {
   const { fill, pointerEvents, height, points, className } = props;
 
   if (!points || points.length === 0) {
@@ -116,6 +142,20 @@ function CustomCursor(props) {
   );
 }
 
+interface CustomTooltipContentProps {
+  active?: boolean;
+  payload?: Array<{
+    dataKey: string;
+    value: number;
+  }>;
+  label?: string;
+  colorMap: Record<string, string>;
+  labelMap: Record<string, string>;
+  dataKeys: string[];
+  valueFormatter?: (value: number) => string;
+  selectedValue: string;
+}
+
 // Custom tooltip component
 const CustomTooltipContent = ({
   active,
@@ -125,14 +165,17 @@ const CustomTooltipContent = ({
   labelMap,
   dataKeys,
   valueFormatter,
-}) => {
+  selectedValue,
+}: CustomTooltipContentProps) => {
   if (!active || !payload || !payload.length) {
     return null;
   }
 
   return (
     <div className="rounded-lg border bg-background p-2 shadow-md">
-      <div className="mb-2 text-xs font-medium">{label}</div>
+      <div className="mb-2 text-xs font-medium">
+        {formatDate(label || "", selectedValue)}
+      </div>
       {dataKeys.map((key) => {
         const dataItem = payload.find((p) => p.dataKey === key);
         if (!dataItem) return null;
@@ -143,7 +186,7 @@ const CustomTooltipContent = ({
               className="h-2 w-2 rounded-full"
               style={{ backgroundColor: colorMap[key] }}
             />
-            <span className="font-medium">{labelMap[key]}:</span>
+            <span className="font-medium"> {labelMap[key]}:</span>
             <span>
               {valueFormatter ? valueFormatter(dataItem.value) : dataItem.value}
             </span>
@@ -154,34 +197,49 @@ const CustomTooltipContent = ({
   );
 };
 
+interface PortfolioChartProps {
+  name?: string;
+  chartData?: ChartPoint[];
+  currentBalance?: number;
+  roi?: number;
+  pnl?: number;
+}
+
 export default function PortfolioChart({
   name = "Portfolio Performance",
   chartData = sampleData,
   currentBalance = 10000,
   roi = 0,
   pnl = 0,
-}) {
+}: PortfolioChartProps) {
   const id = useId();
   const [selectedValue, setSelectedValue] = useState("1h");
   const selectedIndex = TIME_PERIOD_OPTIONS.indexOf(selectedValue);
 
   // Process the data to ensure it has the right format
-  const processedData =
+  const processedData: ProcessedChartPoint[] =
     chartData?.map((point) => ({
       date: point.x,
       time: new Date(point.x).toLocaleTimeString(),
-      actual:
-        point.actual !== undefined
-          ? currentBalance + point.actual
-          : currentBalance,
-      projected:
-        point.projected !== undefined
-          ? currentBalance + point.projected
-          : currentBalance,
+      actual: point.actual !== undefined ? point.actual : 0,
+      projected: point.projected !== undefined ? point.projected : 0,
     })) || sampleData;
 
   // Sort data by date
-  processedData.sort((a, b) => new Date(a.date) - new Date(b.date));
+  processedData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  // Calculate cumulative values
+  let cumulativeActual = 0;
+  let cumulativeProjected = 0;
+  const cumulativeData = processedData.map(point => {
+    cumulativeActual += point.actual;
+    cumulativeProjected += point.projected;
+    return {
+      ...point,
+      actual: cumulativeActual,
+      projected: cumulativeProjected
+    };
+  });
 
   return (
     <Card className="gap-4">
@@ -232,7 +290,7 @@ export default function PortfolioChart({
                 data-state={selectedValue}
                 style={{
                   "--selected-index": selectedIndex,
-                }}
+                } as React.CSSProperties}
               >
                 {TIME_PERIOD_OPTIONS.map((value) => (
                   <ViewOption key={value} id={id} value={value} />
@@ -250,7 +308,7 @@ export default function PortfolioChart({
           <LineChart
             accessibilityLayer
             key={selectedValue}
-            data={processedData}
+            data={cumulativeData}
             margin={{ left: 4, right: 12, top: 12 }}
           >
             <defs>
@@ -291,6 +349,7 @@ export default function PortfolioChart({
                   }}
                   dataKeys={["actual", "projected"]}
                   valueFormatter={(value) => `$${value.toLocaleString()}`}
+                  selectedValue={selectedValue}
                 />
               }
               cursor={<CustomCursor fill="var(--chart-1)" />}
