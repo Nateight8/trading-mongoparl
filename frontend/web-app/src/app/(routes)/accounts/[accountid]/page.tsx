@@ -3,14 +3,13 @@
 import AccountTable from "./_components/account-table";
 import { useQuery } from "@apollo/client";
 import tradeOperations, { TradeProps } from "@/graphql/operations/trade";
-import { mockTradeLogData } from "./_components/account-table";
-import UpdateLog from "./_components/update-log";
 import { Card, CardContent } from "@/components/ui/card";
 import { LogForm } from "./_components/log-form";
 import UpdateLogStatus from "./_components/update-log-status";
 import { useState, use } from "react";
-import { Button } from "@/components/ui/button";
+
 import type { TradeLogItem } from "./_components/account-table";
+import TradeLogger from "./_components/trade-logger";
 
 interface PageProps {
   params: Promise<{
@@ -22,7 +21,9 @@ export default function Page({ params }: PageProps) {
   const { accountid } = use(params);
 
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedTrade, setSelectedTrade] = useState<TradeProps | undefined>(undefined);
+  const [selectedTrade, setSelectedTrade] = useState<TradeProps | undefined>(
+    undefined
+  );
 
   const handleOpen = (trade: TradeLogItem) => {
     setSelectedTrade(trade as TradeProps);
@@ -47,10 +48,7 @@ export default function Page({ params }: PageProps) {
         </div>
       </div>
       <div className="min-h-[100vh] flex-1 md:min-h-min">
-        <AccountTable 
-          handleOpen={handleOpen} 
-          data={data?.loggedTrades ?? []} 
-        />
+        <AccountTable handleOpen={handleOpen} data={data?.loggedTrades ?? []} />
 
         {selectedTrade && (
           <UpdateLogStatus
@@ -60,9 +58,9 @@ export default function Page({ params }: PageProps) {
           />
         )}
       </div>
+      <div className="h-screen flex items-center justify-center">
+        {selectedTrade && <TradeLogger id={accountid} trade={selectedTrade} />}
+      </div>
     </>
   );
 }
-
-// Mocked data for AccountTable
-const mockedData = mockTradeLogData;

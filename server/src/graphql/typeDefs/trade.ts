@@ -358,6 +358,16 @@ export const tradeTypeDefs = gql`
     tradeId: ID
   }
 
+  type ClosedTradeResponse {
+    success: Boolean!
+    message: String
+    trade: Trade
+  }
+  type ClosedTradeInput {
+    tradeId: ID!
+    closed: Float!
+  }
+
   type Mutation {
     createTrade(input: TradeInput!): TradeResponse!
     recordTradeOutcome(input: TradeOutcomeInput!): TradeOutcome!
@@ -372,6 +382,8 @@ export const tradeTypeDefs = gql`
       tradePlanId: ID!
       executionInput: TradeExecutionInput!
     ): Trade!
+
+    closeTrade(input: ClosedTradeInput): ClosedTradeResponse!
   }
 
   """
