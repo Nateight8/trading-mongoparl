@@ -4,7 +4,7 @@ import { conversationResolvers } from "./conversation.js";
 import { participantsResolvers } from "./participants.js";
 import onboardUserResolver from "./onboard-user.js";
 import accountResolvers from "./account.js";
-import tradeDataResolvers from "./trade-data.js";
+import tradeDataResolvers from "./t.js";
 import tradeResolvers from "./trade.js";
 
 // import listenersResolvers from "./listeners.js";

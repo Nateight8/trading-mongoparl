@@ -88,7 +88,10 @@ export const trades = pgTable("trades", {
   exitPrice: decimal("exit_price", { precision: 20, scale: 8 }),
 
   // Boolean to track if the trade is closed
-  closed: boolean("closed").default(false),
+  closed: text("closed").default("false"),
+
+  // Track whether price moved closer to TP or SL after exit
+  projectedOutcome: text("projected_outcome"),
 
   size: decimal("size", { precision: 20, scale: 8 }).notNull(),
   setupType: varchar("setup_type", { length: 50 }),

@@ -315,7 +315,7 @@ const tradeResolvers = {
         const [updatedTrade] = await db
           .update(trades)
           .set({
-            closed: true,
+            closed: "true",
             status: "CLOSED",
             exitPrice: String(input.exitPrice),
             updatedAt: new Date(),

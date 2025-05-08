@@ -26,7 +26,7 @@ function normalizeTrade(t: Trade) {
   const exitPrice = t.exitPrice ? Number(t.exitPrice) : undefined;
 
   // Calculate projectedOutcome for closed trades if not already set
-  let projectedOutcome = (t as any).projectedOutcome;
+  let projectedOutcome = undefined;
 
   // Only calculate for closed trades with exit price
   if (
@@ -34,29 +34,26 @@ function normalizeTrade(t: Trade) {
     exitPrice !== undefined &&
     executedEntryPrice !== undefined
   ) {
-    // If projectedOutcome isn't already set, calculate it
-    if (!projectedOutcome) {
-      // For a BUY trade:
-      // - If exit price is closer to take profit than stop loss, consider it a TP
-      // - Otherwise, consider it a SL
-      // For a SELL trade, the logic is reversed
-      if (t.side.toLowerCase() === "buy") {
-        // Calculate distances to TP and SL as percentages of the range
-        const totalRange = Math.abs(plannedTakeProfit - plannedStopLoss);
-        const distanceToTP = Math.abs(exitPrice - plannedTakeProfit);
-        const distanceToSL = Math.abs(exitPrice - plannedStopLoss);
+    // For a BUY trade:
+    // - If exit price is closer to take profit than stop loss, consider it a TP
+    // - Otherwise, consider it a SL
+    // For a SELL trade, the logic is reversed
+    if (t.side.toLowerCase() === "buy") {
+      // Calculate distances to TP and SL as percentages of the range
+      const totalRange = Math.abs(plannedTakeProfit - plannedStopLoss);
+      const distanceToTP = Math.abs(exitPrice - plannedTakeProfit);
+      const distanceToSL = Math.abs(exitPrice - plannedStopLoss);
 
-        // If closer to TP than SL, mark as TP
-        projectedOutcome = distanceToTP < distanceToSL ? "TP" : "SL";
-      } else {
-        // For SELL trades, reverse the logic
-        const totalRange = Math.abs(plannedTakeProfit - plannedStopLoss);
-        const distanceToTP = Math.abs(exitPrice - plannedTakeProfit);
-        const distanceToSL = Math.abs(exitPrice - plannedStopLoss);
+      // If closer to TP than SL, mark as TP
+      projectedOutcome = distanceToTP < distanceToSL ? "TP" : "SL";
+    } else {
+      // For SELL trades, reverse the logic
+      const totalRange = Math.abs(plannedTakeProfit - plannedStopLoss);
+      const distanceToTP = Math.abs(exitPrice - plannedTakeProfit);
+      const distanceToSL = Math.abs(exitPrice - plannedStopLoss);
 
-        // If closer to TP than SL, mark as TP
-        projectedOutcome = distanceToTP < distanceToSL ? "TP" : "SL";
-      }
+      // If closer to TP than SL, mark as TP
+      projectedOutcome = distanceToTP < distanceToSL ? "TP" : "SL";
     }
   }
 
